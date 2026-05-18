@@ -1,0 +1,116 @@
+
+...
+.....
+Restoring consciousness...
+
+Compatible soul detected...
+
+[ System Initialized Successfully ]
+
+Welcome, Player.
+
+You cannot remember anything.
+
+Not your real name...
+Not your previous world...
+Not even why you are here.
+
+All you know is that your soul has been summoned
+to the world of
+
+"Ardiana"
+
+And successfully connected to a new body.
+
+⚠ WARNING
+Current body synchronization rate: 47%
+
+Some memories are missing...
+Some functions may be unstable...
+
+...
+
+Your vision slowly returns.
+
+Cold air touches your face.
+The smell of wet trees fills the atmosphere.
+A thick fog surrounds you from every direction.
+
+As your eyes fully open,
+you realize that you are standing inside a dark forest.
+
+But something feels wrong...
+
+These memories are not yours.
+
+Fragments of this body's memories begin flowing into your mind.
+
+This world is called:
+
+"Ardiana"
+
+A world filled with magic,
+monsters,
+and endless mysteries.
+
+According to the remaining memories,
+the nearest town is located to the north.
+
+But the path ahead is far from safe...
+
+This forest is known as:
+
+"The Abandoned Forest"
+
+Many people entered this place...
+
+Very few ever returned.
+
+----------------------
+📍 Current Location
+----------------------
+
+The Abandoned Forest — Northern Region
+
+Danger Level: Low
+Monster Encounter Rate: High
+
+----------------------
+🎯 Current Objective
+----------------------
+
+"Survive and reach the town"
+
+----------------------
+📜 Character Data
+----------------------
+
+Name: ${player.name}
+Health: ${player.health} / ${player.maxHealth}
+Coins: ${player.coins}
+EXP: ${player.exp}
+Level: ${player.level}
+
+🎒 Inventory:
+${player.inventory.map((item) => item.name).join(", ") || "(Empty)"}
+
+----------------------
+🎮 System Commands
+----------------------
+
+[W] Move North
+[H] Open Inventory
+[L] Show Level & Stats
+[Q] Quit Game
+
+----------------------
+
+[System Message]
+
+Warning...
+
+Hostile entities have been detected nearby.
+
+Remaining in one place for too long
+is not recommended.
+
