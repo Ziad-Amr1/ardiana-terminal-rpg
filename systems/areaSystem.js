@@ -1,25 +1,17 @@
 const gamestate = require("../state/gameState");
 const { allInGameAreas } = require("../factories/createAreas");
-const {  printspace } = require("../utitls/UIHelper");
+const { printspace, printTitle } = require("../utitls/UIHelper");
 const { encounterCheck } = require("./encounterSystem");
 
 // =========== AREA SYSTEM ===========
 
 let getCurrentArea = () => {
-  return allInGameAreas.find(
-    (area) => area.id === gamestate.player.area_id
-  );
+  return allInGameAreas.find((area) => area.id === gamestate.player.area_id);
 };
 
-// const getArea = () => {
-//   let areaId = getCurrentArea();
-//   let area = allInGameAreas.find((area) => area.id === areaId);
-//   return area;
-// };
-
+// =========== ENCOUNTER CHANCE ===========
 let areaEncounterChance = () => {
-  let currentArea = getCurrentArea();
-
+  const currentArea = getCurrentArea();
   return currentArea.encounterChance;
 };
 
@@ -35,16 +27,7 @@ function movePlayer(direction) {
       `🛣️ Traveling... ${gamestate.travel.remainingSteps} steps remaining.`,
     );
 
-    // random encounter
-    const encountered = encounterCheck(
-      areaEncounterChance()
-    );
-
-    if (encountered) {
-      return "encounter";
-    }
-
-    // player arrived
+    // =========== PLAYER ARRIVED ===========
     if (gamestate.travel.remainingSteps === 0) {
       gamestate.player.area_id = gamestate.travel.destination;
 
@@ -59,6 +42,13 @@ function movePlayer(direction) {
       showCurrentArea();
 
       return "arrived";
+    }
+
+    // =========== RANDOM ENCOUNTER ===========
+    const encountered = encounterCheck(areaEncounterChance());
+
+    if (encountered) {
+      return "encounter";
     }
 
     return "traveling";
@@ -88,7 +78,7 @@ function movePlayer(direction) {
     return "arrived";
   }
 
-  // start travel
+  // =========== BEGIN JOURNEY ===========
   gamestate.travel.destination = nextAreaId;
   gamestate.travel.remainingSteps = distance;
 
@@ -103,22 +93,35 @@ function movePlayer(direction) {
 
 // =========== SHOW AREA ===========
 let showCurrentArea = () => {
-  let currentArea = getCurrentArea();
-
+  const currentArea = getCurrentArea();
   if (!currentArea) {
     console.log("❌ You are not in any area.");
     return;
   }
 
+  printTitle(currentArea.name);
   console.log(currentArea.description);
+  if (currentArea.dangerLevel === 0) {
+    console.log("This is a safe area.");
+  } else {
+    let dangerLevel = currentArea.dangerLevel;
+    if (dangerLevel > 85) {
+      console.log("⚠️ Danger Level: Very High");
+    } else if (dangerLevel > 70) {
+      console.log("⚠️ Danger Level: High");
+    } else if (dangerLevel > 50) {
+      console.log("⚠️ Danger Level: Medium");
+    } else if (dangerLevel > 30) {
+      console.log("⚠️ Danger Level: Low");
+    } else {
+      console.log("⚠️ Danger Level: Very Low");
+    }
+  }
 };
-
-
-
 
 module.exports = {
   getCurrentArea,
   movePlayer,
   showCurrentArea,
-  areaEncounterChance
+  areaEncounterChance,
 };
