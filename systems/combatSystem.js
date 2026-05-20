@@ -1,48 +1,41 @@
-const { allInGameItems } = require("../factories/createItem");
-const { allInGameEnemies } = require("../factories/createEnemy");
-const { addItem, showInventoryBattle, getItem } = require("./inventorySystem");
+const { showInventoryBattle, getItem } = require("./inventorySystem");
 const { leveling } = require("./levelSystem");
-const readline = require("readline");
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-const playerData = require("../data/player");
-let player = playerData.player;
-const { healing } = require("./playerSystem");
+const { loot, dropItem } = require("./lootingSystem");
+const { dice } = require("../utitls/randoms");
+const {  printDivider, printTitle, printspace } = require("../utitls/UIHelper");
 
 // =========== COMBAT SYSTEM ===========
-function loot(target, amount) {
-  target.coins += amount;
-  console.log(`${target.name} got ${amount} coins`);
-}
 
 function takeDamage(target, amount) {
-  target.health -= amount;
+  target.resources.health -= amount;
 
-  console.log(`${target.name} take ${amount} damage`);
+  console.log(`🩸 ${target.info.name} takes ${amount} damage!`);
 
-  if (target.health <= 0) {
-    console.log(`${target.name} died`);
-  }
+  // if (target.resources.health <= 0) {
+  //   console.log(`${target.info.name} died`);
+  // }
 }
 
 let attack = (attacker, target) => {
   if (checkStatus(attacker)) {
-    console.log(`${attacker.name} attacked ${target.name}`);
-    takeDamage(target, attacker.damage);
-    if (target.health > 0) {
-      console.log(`${target.name} had ${target.health} HP`);
+    console.log(`⚔️ ${attacker.info.name} attacks ${target.info.name}!`);
+    printspace();
+    takeDamage(target, attacker.combat.damage);
+    printspace();
+    if (target.resources.health > 0) {
+      console.log(
+        `❤️ ${target.info.name} HP: ${target.resources.health}/${target.resources.maxHealth}`,
+      );
     } else {
-      console.log(`${target.name} had 0 HP`);
+      console.log(`❤️ ${target.info.name} HP: 0/${target.resources.maxHealth}`);
     }
   } else {
-    console.log(`${attacker.name} has died already`);
+    console.log(`${attacker.info.name} has died already`);
   }
 };
 
 let checkStatus = (target) => {
-  if (target.health <= 0) {
+  if (target.resources.health <= 0) {
     return false;
   } else {
     return true;
@@ -50,51 +43,50 @@ let checkStatus = (target) => {
 };
 
 let rolling = () => {
-  let dice = Math.floor(Math.random() * 6) + 1;
-  if (dice <= 3) {
+  let diceRoll = dice();
+  if (diceRoll <= 3) {
     return false;
   } else {
     return true;
   }
 };
 
-let randomNumber = (min, max) => {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-};
-
-let startBattle = () => {
+let startBattle = (gamestate, enemy) => {
+  gamestate.currentBattle = {
+    enemy,
+    turnNumber: 1,
+  };
   let turn = rolling();
   if (turn) {
-    console.log("The Enemy start");
-    return "E";
+    return "enemy";
   } else {
-    console.log("You start");
-    return "P";
+    return "player";
   }
 };
 
-let battle = (player, onExit, enemy) => {
-  if (enemy === undefined) {
-    enemy = choiceEnemy();
-  }
+let battle = (gamestate, rl , onExit, enemy) => {
+  let player = gamestate.player;
 
-  let s = startBattle();
-  let msg = `choose an action: \n
-  1. Attack\n
-  2. Heal\n
-  3. Run\n
+  let battleStarter = startBattle(gamestate, enemy);
+  let msg = `
+  choose an action:
+
+  1. Attack
+  2. Heal
+  3. Run
   `;
-  let turnNumber = 1;
+  let turnNumber = gamestate.currentBattle.turnNumber;
 
   let playerTurn = () => {
     rl.question(msg, (answer) => {
       if (answer === "1") {
         attack(player, enemy);
         if (checkStatus(enemy)) {
-          if (s == "P") {
+          if (battleStarter == "player") {
             enemyTurn();
           } else {
             turnNumber++;
+            gamestate.currentBattle.turnNumber++;
             startTurn();
           }
         } else {
@@ -105,7 +97,7 @@ let battle = (player, onExit, enemy) => {
       } else if (answer === "3") {
         endBattle(1);
       } else {
-        console.log("Invalid Input");
+        console.log("❌ Invalid command.");
         playerTurn();
       }
     });
@@ -114,7 +106,7 @@ let battle = (player, onExit, enemy) => {
   let enemyTurn = () => {
     attack(enemy, player);
     if (checkStatus(player)) {
-      if (s == "E") {
+      if (battleStarter == "enemy") {
         playerTurn();
       } else {
         turnNumber++;
@@ -127,14 +119,18 @@ let battle = (player, onExit, enemy) => {
 
   let inventoryTurn = () => {
     if (showInventoryBattle(player) === false) {
-      console.log(`Your inventory is empty`);
+      console.log(`❌ You don't have any consumable items.`);
       playerTurn();
     } else {
       showInventoryBattle(player);
       rl.question(`Choose an item to use: `, (answer) => {
-        answer = Number(answer) - 1;
-        getItem(player, answer);
-        if (s == "P") {
+        answer = Number(answer);
+        let used = getItem(player, answer);
+        if (!used) {
+          inventoryTurn();
+          return;
+        }
+        if (battleStarter == "player") {
           enemyTurn();
         } else {
           turnNumber++;
@@ -144,75 +140,63 @@ let battle = (player, onExit, enemy) => {
     }
   };
 
-  let resetEnemy = (enemy) => {
-    enemy.health = enemy.maxHealth;
-  };
-
   let endBattle = (status) => {
     if (status === 1) {
       // player escaped
       console.log("Battle End");
-      console.log(`${player.name} ran away from ${enemy.name}`);
-      console.log("");
+      console.log(`${player.info.name} ran away from ${enemy.info.name}`);
+      printspace();
+      gamestate.currentBattle = null;
       onExit();
       return;
     } else if (status === 2) {
       // player won -- enemy died
-      console.log("Battle End");
-      console.log(`${player.name} killed ${enemy.name}`);
-      console.log("");
-      console.log(`${player.name} got ${enemy.loot.exp} EXP`);
+      printTitle("Battle End");
+      console.log(`${player.info.name} defeated ${enemy.info.name}!`);
+      printspace();
+      console.log(`+ ${enemy.loot.exp} EXP`);
       loot(player, enemy.loot.coins);
-      player.exp += enemy.loot.exp;
+      player.progression.exp += enemy.loot.exp;
       leveling(player);
-      dropItem(enemy);
-      if (player.health <= player.maxHealth / 2) {
+      dropItem(player, enemy);
+      if (player.resources.health <= player.resources.maxHealth / 2) {
         console.log(
           `Tip: your health is low, heal yourself before enter new battle`,
         );
       }
-
+      gamestate.currentBattle = null;
       if (checkStatus(player)) {
-        onExit();
+        rl.question("\nPress Enter to continue...", () => {
+          onExit();
+        });
         return;
       } else {
-        console.log(`${player.name} has died, game over`);
+        console.log(`${player.info.name} has died, game over`);
         process.exit(0);
       }
     } else if (status === 3) {
       // player died -- game over
       console.log("Battle End");
-      console.log(`${enemy.name} killed ${player.name}`);
-      console.log(`
-===================\n
-      Game Over\n
-===================
-      
-      `);
+      console.log(`${enemy.info.name} killed ${player.info.name}`);
+      printTitle("Game Over");
+      gamestate.currentBattle = null;
       process.exit(0);
     }
   };
 
-  // let playAgain = () => {
-  //   rl.question(`Do you want to play again? Y/N`, (answer) => {
-  //     if (answer === "Y" || answer === "y") {
-  //       let enemy = choiceEnemy();
-  //       resetEnemy(enemy);
-  //       battle(player, enemy);
-  //     } else if (answer === "N" || answer === "n") {
-  //       console.log("Goodbye");
-  //       process.exit(0);
-  //     } else {
-  //       console.log("Invalid Input");
-  //       playAgain();
-  //     }
-  //   });
-  // };
+  if (turnNumber === 1) {
+    console.log("⚔️ BATTLE STARTS!");
+    console.log(`You are fighting ${enemy.info.name}`);
+    if (battleStarter == "enemy") {
+      console.log("⚔️ The enemy moves first!");
+    } else {
+      console.log("⚔️ You move first!");
+    }
+  }
 
   let startTurn = () => {
-    console.log(`======= Turn ${turnNumber} =======`);
-
-    if (s == "E") {
+    printTitle(`TURN ${turnNumber}`);
+    if (battleStarter == "enemy") {
       enemyTurn();
     } else {
       playerTurn();
@@ -221,47 +205,9 @@ let battle = (player, onExit, enemy) => {
   startTurn();
 };
 
-let choiceEnemy = () => {
-  let enemies = [
-    { enemy: allInGameEnemies[0].name, chance: 60 },
-    { enemy: allInGameEnemies[1].name, chance: 30 },
-    { enemy: allInGameEnemies[2].name, chance: 10 },
-  ];
-  let chance1 = enemies[0].chance;
-  let chance2 = chance1 + enemies[1].chance;
-  let spawn = randomNumber(1, 100);
-  if (spawn <= chance1) {
-    console.log(`You are fighting ${allInGameEnemies[0].name}`);
-    return allInGameEnemies[0];
-  } else if (spawn <= chance2) {
-    console.log(`You are fighting ${allInGameEnemies[1].name}`);
-    return allInGameEnemies[1];
-  } else {
-    console.log(`You are fighting ${allInGameEnemies[2].name}`);
-    return allInGameEnemies[2];
-  }
-};
-
-let dropItem = (enemy) => {
-  let chance = enemy.loot.items.DR;
-  if (chance >= randomNumber(1, 100)) {
-    // 20 >= random number 1-100
-    console.log(`You got ${enemy.loot.items.name}`);
-    allInGameItems.forEach((item) => {
-      if (item.name === enemy.loot.items.name) {
-        addItem(player, item);
-      }
-    });
-  } else {
-    console.log(`No item dropped`);
-  }
-};
-
 module.exports = {
   attack,
   checkStatus,
   battle,
-  choiceEnemy,
-  dropItem,
   takeDamage,
 };

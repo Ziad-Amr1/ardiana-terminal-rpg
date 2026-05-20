@@ -1,12 +1,9 @@
-const playerData = require("../data/player");
-let player = playerData.player;
-const { allInGameItems } = require("../factories/createItem");
-const { allInGameEnemies } = require("../factories/createEnemy");
-const { healing } = require("./playerSystem");
+const { restoreHealth } = require("./playerSystem");
+const {  printDivider, printTitle, printspace } = require("../utitls/UIHelper");
 
 // ========== INVENTORY SYSTEM ===========
 let addItem = (player, item) => {
-  player.inventory.push(item);
+   player.inventory.push(item);
 };
 
 let removeItem = (player, item) => {
@@ -16,9 +13,9 @@ let removeItem = (player, item) => {
 let useItem = (player, item) => {
   if (item.category === "consumable") {
     if (item.effect["healAmount"]) {
-      healing(player, item.effect.healAmount);
+      console.log(`${player.info.name} uses ${item.name}`);
+      restoreHealth(player, item.effect.healAmount);
       removeItem(player, item);
-      console.log(`${item.name} healed ${player.name}`);
     }
   }
 };
@@ -27,25 +24,15 @@ let showInventory = (player) => {
   if (player.inventory.length === 0) {
     console.log("Your inventory is empty");
   } else {
-    console.log("Your inventory:");
-    player.inventory.forEach((item) => {
-      console.log(`${item.name} - ${item.description}`);
-    });
+    printInventory(player);
   }
 };
 
 let showInventoryBattle = (player) => {
-  if (player.inventory.length === 0) {
+  if (player.inventory.filter((item) => item.category === "consumable").length === 0) {
     return false;
   } else {
-    console.log("Your inventory:");
-    let i = 1;
-    player.inventory.forEach((item) => {
-      if (item.category === "consumable") {
-        console.log(`${i} - ${item.name} - ${item.description}`);
-        i++;
-      }
-    });
+    printInventory(player, "consumable");
   }
 };
 
@@ -53,8 +40,33 @@ let getItem = (player, number) => {
   let consumables = player.inventory.filter(
     (item) => item.category === "consumable",
   );
-  let item = consumables[number];
+  let item = consumables[number - 1];
+  if (!item) {
+   console.log("❌ Invalid item.");
+   return false;
+  }
   useItem(player, item);
+  return true;
+};
+
+let printInventory = (player, category) => {
+    printTitle("Your inventory:");
+    printspace();
+    let i = 1;
+    player.inventory.forEach((item) => {
+      if (category != null){
+      if (item.category === category) {
+        console.log(`${i} - ${item.name} - ${item.description}`);
+        printspace();
+        i++;
+      }
+    } else {
+      console.log(`${i} - ${item.name} - ${item.description}`);
+      printspace();
+      i++;
+    }
+      
+    });
 };
 
 module.exports = {
