@@ -53,7 +53,7 @@ let main = () => {
 
         // =========== INVENTORY ===========
       } else if (answer === "h") {
-        showInventory(gamestate);
+        showInventory(gamestate.player);
 
         mainMenu();
 

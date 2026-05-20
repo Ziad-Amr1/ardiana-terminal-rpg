@@ -1,8 +1,8 @@
 const { showInventoryBattle, getItem } = require("./inventorySystem");
 const { leveling } = require("./levelSystem");
 const { loot, dropItem } = require("./lootingSystem");
-const { dice } = require("../utitls/randoms");
-const {  printDivider, printTitle, printspace } = require("../utitls/UIHelper");
+const { dice, randomNumber } = require("../utitls/randoms");
+const { printDivider, printTitle, printspace } = require("../utitls/UIHelper");
 
 // =========== COMBAT SYSTEM ===========
 
@@ -64,22 +64,27 @@ let startBattle = (gamestate, enemy) => {
   }
 };
 
-let battle = (gamestate, rl , onExit, enemy) => {
+let battle = (gamestate, rl, onExit, enemy) => {
   let player = gamestate.player;
 
   let battleStarter = startBattle(gamestate, enemy);
   let msg = `
   choose an action:
 
-  1. Attack
-  2. Heal
-  3. Run
+  [ A ] Attack
+  [ H ] Heal
+  [ R ] Run
+
   `;
+  // [S] Skill
+  // [D] Defend
+  // [I] Inventory
   let turnNumber = gamestate.currentBattle.turnNumber;
 
   let playerTurn = () => {
     rl.question(msg, (answer) => {
-      if (answer === "1") {
+      answer = answer.trim().toLowerCase();
+      if (answer === "a") {
         attack(player, enemy);
         if (checkStatus(enemy)) {
           if (battleStarter == "player") {
@@ -92,9 +97,9 @@ let battle = (gamestate, rl , onExit, enemy) => {
         } else {
           endBattle(2);
         }
-      } else if (answer === "2") {
+      } else if (answer === "h") {
         inventoryTurn();
-      } else if (answer === "3") {
+      } else if (answer === "r") {
         endBattle(1);
       } else {
         console.log("❌ Invalid command.");
@@ -145,6 +150,10 @@ let battle = (gamestate, rl , onExit, enemy) => {
       // player escaped
       console.log("Battle End");
       console.log(`${player.info.name} ran away from ${enemy.info.name}`);
+      console.log("You got lost while escaping"); // The monster forced you backward
+      const penalty = randomNumber(1, 2);
+      console.log(`+ ${penalty} steps`);
+      gamestate.travel.remainingSteps += penalty;
       printspace();
       gamestate.currentBattle = null;
       onExit();
