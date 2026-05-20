@@ -1,22 +1,29 @@
-
-
 let allInGameEnemies = [];
 
-let createEnemy = (na, hp, dmg, coins, exp, items) => {
+let createEnemy = (id, name, health, damage, coins, exp, loot, area_id) => {
   let obj = {
-    name: na,
-    health: hp,
-    maxHealth: hp,
-    damage: dmg,
-    loot: {
-      coins: coins,
-      exp: exp,
-      items: items,
+    id,
+    info: {
+      name,
     },
+    resources: {
+      health,
+      maxHealth: health,
+    },
+    combat: {
+      damage,
+      critChance: 5,
+      critDamage: 1.5*damage,
+    },
+    loot: {
+      exp,
+      coins,
+      items: loot,
+    },
+    area_id
   };
   allInGameEnemies.push(obj);
   return obj;
 };
-
 
 module.exports = { allInGameEnemies, createEnemy };

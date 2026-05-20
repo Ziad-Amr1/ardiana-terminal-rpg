@@ -1,13 +1,45 @@
-let player = {
-  name: "Kayda",
-  health: 10,
-  maxHealth: 10,
-  coins: 500,
-  level: 1,
-  exp: 0,
-  exp_required: 100,
-  damage: 4,
+const player = {
+  id: "player_1",
+
+  info: {
+    name: "Kayda",
+  },
+
+  stats: {
+    STR: 5, // STR increases physical damage
+    VIT: 5, // VIT increases HP
+    WIS: 5, // WIS increases mana
+    DEX: 5, // DEX increases crit chance
+    LUK: 5, // LUK increases drop rate
+  },
+
+  resources: {
+    health: 10,
+    maxHealth: 10,
+    mana: 10,
+    maxMana: 10,
+    stamina: 10,
+    maxStamina: 10,
+  },
+
+  combat: {
+    damage: 4,
+    critChance: 5,
+    critDamage: 6, // 1.5 * damage
+  },
+
+  progression: {
+    level: 1,
+    exp: 0,
+    expRequired: 100,
+  },
+
+  economy: {
+    coins: 500,
+  },
+
   inventory: [],
+  area_id: "abandoned_forest",
 };
 
 module.exports = { player };

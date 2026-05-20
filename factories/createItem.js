@@ -1,12 +1,13 @@
 let allInGameItems = [];
 
-let createItem = (na, des, cat, va, eff) => {
+let createItem = (id, name, description, category, value, effect) => {
   let obj = {
-    name: na,
-    description: des,
-    category: cat,
-    value: va,
-    effect: eff,
+    id,
+    name,
+    description,
+    category,
+    value,
+    effect
   };
   allInGameItems.push(obj);
   return obj;
