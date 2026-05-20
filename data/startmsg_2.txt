@@ -1,0 +1,21 @@
+
+
+----------------------
+🎮 System Commands
+----------------------
+
+[W] Move North
+[H] Open Inventory
+[L] Show Level & Stats
+[Q] Quit Game
+
+----------------------
+
+[System Message]
+
+Warning...
+
+Hostile entities have been detected nearby.
+
+Remaining in one place for too long
+is not recommended.

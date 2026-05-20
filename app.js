@@ -1,72 +1,133 @@
 // =========== IMPORTS ===========
-const playerData = require("./data/player");
-const { choiceEnemy, battle, checkStatus } = require("./systems/combatSystem");
+const gamestate = require("./state/gameState");
+const { battle } = require("./systems/combatSystem");
 const { showInventory } = require("./systems/inventorySystem");
 const { showLevel } = require("./systems/levelSystem");
-const { savePlayer, loadPlayer } = require("./systems/saveSystem");
+const { choiceEnemy } = require("./systems/spawningSystem");
+const { getCurrentArea } = require("./systems/areaSystem");
+const { saveGamestate, loadGamestate } = require("./systems/saveSystem");
+const { movePlayer } = require("./systems/areaSystem");
+const { renderCharacterIntro } = require("./utitls/renderCharacterIntro");
+const { printMenu, printspace } = require("./utitls/UIHelper");
 const readline = require("readline");
 const fs = require("fs");
 
-const msg = fs.readFileSync("./data/startmsg.txt", "utf8");
+// =========== GAME DATA ===========
+require("./data/enemies");
+require("./data/items");
+require("./data/areas");
 
+// =========== READ FILES ===========
+const msg = fs.readFileSync("./data/startmsg.txt", "utf8");
+const msg2 = fs.readFileSync("./data/startmsg_2.txt", "utf8");
+const gameStateFileLoad = fs.readFileSync("./data/gamestate.json", "utf8");
+
+// =========== READLINE ===========
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-require("./data/enemies");
-require("./data/items");
-
-let player = playerData.player;
+// =========== MAIN MENU ===========
+let menuMsg = printMenu();
 
 // =========== MAIN ===========
 let main = () => {
-  console.log(`${msg}`);
-
+  // =========== MAIN MENU ===========
   let mainMenu = () => {
-    rl.question("Choose an action: ", (answer) => {
+    rl.question(menuMsg, (answer) => {
       answer = answer.trim().toLowerCase();
 
+      // =========== MOVE ===========
       if (answer === "w") {
-        console.log("\n⬆️ You moved north...\n");
+        const result = movePlayer("north");
 
-        battle(player, mainMenu);
+        // encounter happened
+        if (result === "encounter") {
+          const enemy = choiceEnemy(getCurrentArea());
+          battle(gamestate, rl, mainMenu, enemy);
+          return;
+        }
+
+        mainMenu();
+
+        // =========== INVENTORY ===========
       } else if (answer === "h") {
-        showInventory(player);
+        showInventory(gamestate);
+
         mainMenu();
+
+        // =========== LEVEL ===========
       } else if (answer === "l") {
-        showLevel(player);
+        showLevel(gamestate);
+
         mainMenu();
+
+        // =========== QUIT ===========
       } else if (answer === "q") {
         rl.question("Do you want to save your progress? Y/N ", (answer) => {
           answer = answer.trim().toLowerCase();
 
+          // save game
           if (answer === "y") {
-            savePlayer(player);
+            saveGamestate(gamestate);
 
-            console.log("\n💾 Game Saved Successfully.");
-            console.log("Disconnecting from system...\nGoodbye.");
+            printspace();
+            console.log("💾 Game Saved Successfully.");
+            console.log("Disconnecting from system...");
+            console.log("Goodbye.");
 
             process.exit(0);
+
+            // quit without save
           } else if (answer === "n") {
-            console.log("\nDisconnecting from system...\nGoodbye.");
+            printspace();
+            console.log("Disconnecting from system...");
+            console.log("Goodbye.");
 
             process.exit(0);
+
+            // invalid input
           } else {
-            console.log("\n❌ Invalid Input\n");
+            printspace();
+            console.log("❌ Invalid Input");
+            printspace();
 
             mainMenu();
           }
         });
+
+        // =========== INVALID ===========
       } else {
-        console.log("\n❌ Invalid Input\n");
+        printspace();
+        console.log("❌ Invalid Input");
+        printspace();
 
         mainMenu();
       }
     });
   };
 
-  mainMenu();
+  // =========== NEW GAME ===========
+  if (gameStateFileLoad.trim() === "") {
+    console.log(msg);
+
+    renderCharacterIntro();
+
+    console.log(msg2);
+
+    mainMenu();
+
+    // =========== LOAD GAME ===========
+  } else {
+    loadGamestate();
+
+    printspace();
+    console.log("💾 Save Loaded Successfully.");
+    printspace();
+
+    mainMenu();
+  }
 };
 
 main();
