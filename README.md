@@ -40,6 +40,7 @@ state/
 utils/
 app.js
 Current Goals
+```
 
 The project is currently focused on:
 
