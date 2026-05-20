@@ -1,3 +1,5 @@
 node_modules/
 player.json
 plan.md
+
+data/gamestate.json
