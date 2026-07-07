@@ -1,5 +1,5 @@
 // =========== Routes ==============
-const createMainMenuRoutrt = (prep) => {
+const createMainMenuRouter = (prep) => {
   return {
     w: () => {
       const result = prep.movePlayer("north");
@@ -79,4 +79,4 @@ const createMainMenuRoutrt = (prep) => {
   };
 };
 
-module.exports = createMainMenuRoutrt;
+module.exports = createMainMenuRouter;
