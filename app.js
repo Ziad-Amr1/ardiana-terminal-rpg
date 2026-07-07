@@ -5,12 +5,27 @@ const { showInventory } = require("./systems/inventorySystem");
 const { showLevel } = require("./systems/levelSystem");
 const { choiceEnemy } = require("./systems/spawningSystem");
 const { getCurrentArea } = require("./systems/areaSystem");
-const { saveGamestate, loadGamestate } = require("./systems/saveSystem");
+const {
+  saveGamestate,
+  loadGamestate,
+  saveExists,
+} = require("./systems/saveSystem");
 const { movePlayer } = require("./systems/areaSystem");
-const { renderCharacterIntro } = require("./utitls/renderCharacterIntro");
-const { printMenu, printspace } = require("./utitls/UIHelper");
+const {
+  renderCharacterIntro,
+  characterStatsWindow,
+} = require("./utitls/renderCharacterIntro");
+const {
+  printMenu,
+  printMenuCity,
+  printspace,
+  printLoadMenu,
+} = require("./utitls/UIHelper");
+const { rest } = require("./systems/restSystem");
+const { startDialogue } = require("./systems/dialogueSystem");
 const readline = require("readline");
 const fs = require("fs");
+const createMainMenuRoutrt = require("./routers/mainMenuRouter");
 
 // =========== GAME DATA ===========
 require("./data/enemies");
@@ -20,7 +35,6 @@ require("./data/areas");
 // =========== READ FILES ===========
 const msg = fs.readFileSync("./data/startmsg.txt", "utf8");
 const msg2 = fs.readFileSync("./data/startmsg_2.txt", "utf8");
-const gameStateFileLoad = fs.readFileSync("./data/gamestate.json", "utf8");
 
 // =========== READLINE ===========
 const rl = readline.createInterface({
@@ -29,74 +43,43 @@ const rl = readline.createInterface({
 });
 
 // =========== MAIN MENU ===========
-let menuMsg = printMenu();
+let getMenu = () => {
+  const currentArea = getCurrentArea();
+
+  if (currentArea.type === "city") {
+    return printMenuCity();
+  }
+
+  return printMenu();
+};
 
 // =========== MAIN ===========
 let main = () => {
   // =========== MAIN MENU ===========
   let mainMenu = () => {
-    rl.question(menuMsg, (answer) => {
+    rl.question(getMenu(), (answer) => {
       answer = answer.trim().toLowerCase();
 
-      // =========== MOVE ===========
-      if (answer === "w") {
-        const result = movePlayer("north");
+      // =========== Routes ==============
+      const routes = createMainMenuRoutrt({
+        gamestate,
+        rl,
+        mainMenu,
+        movePlayer,
+        battle,
+        showLevel,
+        characterStatsWindow,
+        rest,
+        startDialogue,
+        saveGamestate,
+        printspace,
+        choiceEnemy,
+        getCurrentArea,
+        showInventory,
+      });
 
-        // encounter happened
-        if (result === "encounter") {
-          const enemy = choiceEnemy(getCurrentArea());
-          battle(gamestate, rl, mainMenu, enemy);
-          return;
-        }
-
-        mainMenu();
-
-        // =========== INVENTORY ===========
-      } else if (answer === "h") {
-        showInventory(gamestate.player);
-
-        mainMenu();
-
-        // =========== LEVEL ===========
-      } else if (answer === "l") {
-        showLevel(gamestate);
-
-        mainMenu();
-
-        // =========== QUIT ===========
-      } else if (answer === "q") {
-        rl.question("Do you want to save your progress? Y/N ", (answer) => {
-          answer = answer.trim().toLowerCase();
-
-          // save game
-          if (answer === "y") {
-            saveGamestate(gamestate);
-
-            printspace();
-            console.log("💾 Game Saved Successfully.");
-            console.log("Disconnecting from system...");
-            console.log("Goodbye.");
-
-            process.exit(0);
-
-            // quit without save
-          } else if (answer === "n") {
-            printspace();
-            console.log("Disconnecting from system...");
-            console.log("Goodbye.");
-
-            process.exit(0);
-
-            // invalid input
-          } else {
-            printspace();
-            console.log("❌ Invalid Input");
-            printspace();
-
-            mainMenu();
-          }
-        });
-
+      if (routes[answer]) {
+        routes[answer]();
         // =========== INVALID ===========
       } else {
         printspace();
@@ -109,25 +92,65 @@ let main = () => {
   };
 
   // =========== NEW GAME ===========
-  if (gameStateFileLoad.trim() === "") {
-    console.log(msg);
 
-    renderCharacterIntro();
-
-    console.log(msg2);
-
-    mainMenu();
-
-    // =========== LOAD GAME ===========
-  } else {
-    loadGamestate();
-
-    printspace();
-    console.log("💾 Save Loaded Successfully.");
+  let startupMenu = () => {
     printspace();
 
-    mainMenu();
-  }
+    printLoadMenu();
+
+    rl.question("> ", (answer) => {
+      answer = answer.trim().toLowerCase();
+
+      // ========== NEW GAME ==========
+      if (answer === "1") {
+        console.log(msg);
+
+        renderCharacterIntro(gamestate.player);
+
+        console.log(msg2);
+
+        mainMenu();
+
+        // ========== LOAD GAME ==========
+      } else if (answer === "2") {
+        if (!saveExists()) {
+          printspace();
+
+          console.log("❌ No save file found.");
+
+          startupMenu();
+
+          return;
+        }
+
+        loadGamestate();
+
+        printspace();
+
+        console.log("💾 Save Loaded Successfully.");
+
+        printspace();
+
+        mainMenu();
+
+        // ========== QUIT ==========
+      } else if (answer === "q") {
+        console.log("Disconnecting from system...");
+
+        process.exit(0);
+
+        // ========== INVALID ==========
+      } else {
+        printspace();
+
+        console.log("❌ Invalid Input");
+
+        startupMenu();
+      }
+    });
+  };
+
+  startupMenu();
 };
 
 main();
