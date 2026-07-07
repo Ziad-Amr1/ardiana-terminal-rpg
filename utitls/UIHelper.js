@@ -1,3 +1,5 @@
+// ./utitls/UIHelper.js
+// =========== UI HELPERS ===========
 let printDivider = () => {
     console.log(`
 ========================
@@ -53,6 +55,7 @@ let printSaveMenu = () => {
 };
 
 let printLoadMenu = () => {
+  printspace();
   console.log( `
 ========================
       ARDIANA
@@ -63,22 +66,6 @@ let printLoadMenu = () => {
 [Q] Quit
 
 `);};
-
-let printCombatHUD = (player, enemy) => {
-  console.log(`
-========================
-⚔️ COMBAT STATUS
-========================
-
-${player.info.name}
-❤️ HP: ${player.resources.health}/${player.resources.maxHealth}
-
-${enemy.info.name}
-❤️ HP: ${enemy.resources.health}/${enemy.resources.maxHealth}
-
-========================
-`);
-};
 
 
 let printTitle = (title) => {
@@ -93,13 +80,37 @@ let printspace = () => {
   console.log();
 };
 
+let printInvalidInput = () => {
+  printspace();
+  console.log("❌ Invalid Input");
+  printspace();
+};
+
+let printNoSaveFile = () => {
+  printspace();
+  console.log("❌ No save file found.");
+};
+
+let printSaveLoaded = () => {
+  printspace();
+  console.log("💾 Save Loaded Successfully.");
+  printspace();
+};
+
+let printLeaveGame = () => {
+  console.log("Disconnecting from system...");
+};
+
 module.exports = {
   printDivider,
   printMenu,
   printMenuCity,
-  printCombatHUD,
   printSaveMenu,
   printLoadMenu,
   printTitle,
-  printspace
+  printspace,
+  printInvalidInput,
+  printNoSaveFile,
+  printSaveLoaded,
+  printLeaveGame,
 };

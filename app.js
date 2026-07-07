@@ -20,12 +20,16 @@ const {
   printMenuCity,
   printspace,
   printLoadMenu,
+  printInvalidInput,
+  printNoSaveFile,
+  printSaveLoaded,
+  printLeaveGame,
 } = require("./utitls/UIHelper");
 const { rest } = require("./systems/restSystem");
 const { startDialogue } = require("./systems/dialogueSystem");
 const readline = require("readline");
 const fs = require("fs");
-const createMainMenuRoutrt = require("./routers/mainMenuRouter");
+const createMainMenuRouter = require("./routers/mainMenuRouter");
 
 // =========== GAME DATA ===========
 require("./data/enemies");
@@ -61,7 +65,7 @@ let main = () => {
       answer = answer.trim().toLowerCase();
 
       // =========== Routes ==============
-      const routes = createMainMenuRoutrt({
+      const routes = createMainMenuRouter({
         gamestate,
         rl,
         mainMenu,
@@ -82,9 +86,7 @@ let main = () => {
         routes[answer]();
         // =========== INVALID ===========
       } else {
-        printspace();
-        console.log("❌ Invalid Input");
-        printspace();
+        printInvalidInput();
 
         mainMenu();
       }
@@ -94,8 +96,6 @@ let main = () => {
   // =========== NEW GAME ===========
 
   let startupMenu = () => {
-    printspace();
-
     printLoadMenu();
 
     rl.question("> ", (answer) => {
@@ -104,9 +104,7 @@ let main = () => {
       // ========== NEW GAME ==========
       if (answer === "1") {
         console.log(msg);
-
         renderCharacterIntro(gamestate.player);
-
         console.log(msg2);
 
         mainMenu();
@@ -114,10 +112,7 @@ let main = () => {
         // ========== LOAD GAME ==========
       } else if (answer === "2") {
         if (!saveExists()) {
-          printspace();
-
-          console.log("❌ No save file found.");
-
+          printNoSaveFile();
           startupMenu();
 
           return;
@@ -125,26 +120,18 @@ let main = () => {
 
         loadGamestate();
 
-        printspace();
-
-        console.log("💾 Save Loaded Successfully.");
-
-        printspace();
+        printSaveLoaded();
 
         mainMenu();
 
         // ========== QUIT ==========
       } else if (answer === "q") {
-        console.log("Disconnecting from system...");
-
+        printLeaveGame();
         process.exit(0);
 
         // ========== INVALID ==========
       } else {
-        printspace();
-
-        console.log("❌ Invalid Input");
-
+        printInvalidInput();
         startupMenu();
       }
     });

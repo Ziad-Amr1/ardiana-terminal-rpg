@@ -212,7 +212,7 @@ let battle = (gamestate, rl, onExit, enemy) => {
   };
 
   if (combatState.turnNumber === 1) {
-    combatUI.printTrunOne(combatState.enemy);
+    combatUI.printTurnOne(combatState.enemy);
     if (combatState.battleStarter == "enemy") {
       combatUI.printEnemyStart();
     } else {

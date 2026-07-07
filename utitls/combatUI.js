@@ -1,10 +1,8 @@
 // ./utitls/combatUI.js
 // =========== imports ===========
 const {
-  printDivider,
   printTitle,
   printspace,
-  printCombatHUD,
 } = require("./UIHelper");
 
 // =========== COMBAT UI ===========
@@ -70,17 +68,17 @@ const printDefeated = (player, enemy) => {
   printTitle("Game Over");
 };
 
-const printTrunOne = (enemy) => {
+const printTurnOne = (enemy) => {
   console.log("⚔️ BATTLE STARTS!");
   console.log(`You are fighting ${enemy.info.name}`);
 };
 
 const printPlayerStart = () => {
-  console.log("⚔️ The enemy moves first!");
+  console.log("⚔️ You move first!");
 };
 
 const printEnemyStart = () => {
-  console.log("⚔️ You move first!");
+  console.log("⚔️ The enemy moves first!");
 };
 
 const printStartTurnPrint = (combatState) => {
@@ -105,6 +103,22 @@ const printChoiceMenu = () => {
   // [I] Inventory
 };
 
+let printCombatHUD = (player, enemy) => {
+  console.log(`
+========================
+⚔️ COMBAT STATUS
+========================
+
+${player.info.name}
+❤️ HP: ${player.resources.health}/${player.resources.maxHealth}
+
+${enemy.info.name}
+❤️ HP: ${enemy.resources.health}/${enemy.resources.maxHealth}
+
+========================
+`);
+};
+
 const printChoiceItem = () => {
   return `Choose an item to use= `;
 };
@@ -113,9 +127,6 @@ const printContinueMenu = () => {
   return `\nPress Enter to continue...`;
 };
 
-const printHealth = () => {};
-const printDefense = () => {};
-const printDamage = () => {};
 
 module.exports = {
   printAttack,
@@ -125,20 +136,17 @@ module.exports = {
   printWon,
   printTip,
   printLost,
-  printDefeated,
-  printTrunOne,
+  printTurnOne,
   printPlayerStart,
   printEnemyStart,
   printStartTurnPrint,
   printChoiceMenu,
   printChoiceItem,
   printContinueMenu,
-  printHealth,
-  printDefense,
-  printDamage,
   printDiedAlready,
   printRestHealth,
   printZeroHealth,
   printWrongInput,
   printInvalidItem,
+  printCombatHUD,
 };
