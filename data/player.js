@@ -5,7 +5,7 @@ const player = {
     name: "Kayda",
   },
 
-  stats: {
+  base_stats: {
     STR: 5, // STR increases physical damage
     VIT: 5, // VIT increases HP
     WIS: 5, // WIS increases mana
@@ -25,13 +25,14 @@ const player = {
   combat: {
     damage: 4,
     critChance: 5,
-    critDamage: 6, // 1.5 * damage
+    critDamage: 0, // 1.5 * damage
   },
 
   progression: {
     level: 1,
     exp: 0,
     expRequired: 100,
+    statsPoints: 0,
   },
 
   economy: {
@@ -40,6 +41,14 @@ const player = {
 
   inventory: [],
   area_id: "abandoned_forest",
+
+  equipment: {
+    weapon: null,
+    armor: null,
+    accessory: null,
+  },
+  // currentBuffs
+  // statusEffects
 };
 
 module.exports = { player };
