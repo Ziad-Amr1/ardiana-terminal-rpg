@@ -7,6 +7,11 @@ const gameState = {
   player,
   currentBattle: null,
   world: {},
+// world: {
+//   visitedAreas,
+//   unlockedServices,
+//   storyFlags,
+// }
   travel: {
    destination: null,
    remainingSteps: 0,
