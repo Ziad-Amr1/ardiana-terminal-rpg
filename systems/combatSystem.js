@@ -9,7 +9,7 @@ const createCombatRoutrt = require("../routers/combatRouter");
 // =========== COMBAT SYSTEM ===========
 
 function takeDamage(target, amount) {
-  target.resources.health -= amount;
+  target.resources.health = Math.max(0, target.resources.health - amount);
 
   combatUI.printTakeDamage(target, amount);
 

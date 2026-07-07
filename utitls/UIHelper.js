@@ -1,78 +1,88 @@
 // ./utitls/UIHelper.js
+const {
+  error,
+  success,
+  title,
+  menuKeys,
+} = require("./colorSystem");
+
 // =========== UI HELPERS ===========
 let printDivider = () => {
-    console.log(`
+  console.log(`
 ========================
 `);
 };
 
+const renderHeader = (text) => {
+  const titleText = title(text);
 
-let printMenu = () => {
+  return `========================
+        ${titleText}
+========================`;
+};
+
+const printTitle = (text) => {
+  console.log(renderHeader(text));
+};
+
+const renderKeys = (text) => {
+  return text.replace(/\[[A-Z0-9]\]/g, (match) => menuKeys(match));
+};
+
+let renderMenu = () => {
   return `
-========================
-        MAIN MENU
-========================
-
+${renderHeader("MENU")}
+${renderKeys(`
 [W] Move North
 [H] Inventory
 [L] Level & Stats
 [T] Rest
-[Q] Save & Quit
+[Q] Save & Quit`)}
 
 ========================
 `;
 };
 
-let printMenuCity = () => {
+let renderMenuCity = () => {
   return `
-========================
-        CITY MENU
-========================
-
+${renderHeader("CITY MENU")}
+${renderKeys(`
 [W] Travel
 [S] Shop
 [R] Rest At Inn
 [B] Blacksmith
 [N] NPCs
 [L] Stats
-[Q] Quit
+[Q] Quit`)}
 
 ========================
 `;
 };
 
 let printSaveMenu = () => {
-  console.log( `
-========================
-        SAVE MENU
-========================
-
+  console.log(`
+${renderHeader("SAVE MENU")}
+${renderKeys(`
 [S] Save Game
 [L] Load Game
-[Q] Quit
+[Q] Quit`)}
+
+========================
 
 `);
 };
 
 let printLoadMenu = () => {
-  printspace();
-  console.log( `
-========================
-      ARDIANA
-========================
-
+  // why this ARDIANA?
+  console.log(`
+${renderHeader("ARDIANA")}
+${renderKeys(`
 [1] New Game
 [2] Load Game
-[Q] Quit
+[Q] Quit`)}
 
-`);};
-
-
-let printTitle = (title) => {
-  console.log(`
 ========================
-        ${title}
-========================
+
 `);
 };
 
@@ -80,20 +90,15 @@ let printspace = () => {
   console.log();
 };
 
-let printInvalidInput = () => {
+let printError = (message) => {
   printspace();
-  console.log("❌ Invalid Input");
+  console.log(error(`❌ ${message}`));
   printspace();
-};
-
-let printNoSaveFile = () => {
-  printspace();
-  console.log("❌ No save file found.");
 };
 
 let printSaveLoaded = () => {
   printspace();
-  console.log("💾 Save Loaded Successfully.");
+  console.log(success("💾 Save Loaded Successfully."));
   printspace();
 };
 
@@ -103,14 +108,15 @@ let printLeaveGame = () => {
 
 module.exports = {
   printDivider,
-  printMenu,
-  printMenuCity,
+  renderMenu,
+  renderMenuCity,
   printSaveMenu,
   printLoadMenu,
   printTitle,
   printspace,
-  printInvalidInput,
-  printNoSaveFile,
+  printError,
   printSaveLoaded,
   printLeaveGame,
+  renderKeys,
+  renderHeader, 
 };

@@ -3,45 +3,81 @@
 const {
   printTitle,
   printspace,
+  renderHeader,
+  renderKeys,
+  printError,
 } = require("./UIHelper");
+
+const {
+  player: playerColor,
+  enemy: enemyColor,
+  damage: damageColor,
+  health: healthColor,
+  exp: expColor,
+  warning,
+} = require("./colorSystem");
 
 // =========== COMBAT UI ===========
 const printTakeDamage = (target, amount) => {
-  console.log(`🩸 ${target.info.name} takes ${amount} damage!`);
+  console.log(`🩸 ${target.info.name} takes ${damageColor(amount)} damage!`);
 };
 
 const printAttack = (attacker, target) => {
-  console.log(`⚔️ ${attacker.info.name} attacks ${target.info.name}!`);
+  console.log(`⚔️  ${attacker.info.name} attacks ${target.info.name}! 💥`);
   printspace();
 };
 
 const printDiedAlready = (attacker) => {
-  console.log(`❌ ${attacker.info.name} has died already.`);
+  printError(`${attacker.info.name} has died already.`);
+};
+
+const renderHealthBar = (currentHealth, maxHealth, barSize = 10) => {
+  if (currentHealth <= 0) {
+    return `[${"░".repeat(barSize)}]`;
+  }
+
+  if (currentHealth >= maxHealth) {
+    return `[${"█".repeat(barSize)}]`;
+  }
+
+  const healthRatio = currentHealth / maxHealth;
+
+  const filledSize = Math.floor(healthRatio * barSize);
+  const emptySize = barSize - filledSize;
+
+  const filledBar = "█".repeat(filledSize);
+  const emptyBar = "░".repeat(emptySize);
+
+  return `[${filledBar}${emptyBar}]`;
 };
 
 const printRestHealth = (target) => {
   printspace();
   console.log(
-    `❤️   ${target.info.name} HP= ${target.resources.health}/${target.resources.maxHealth}`,
+    `❤️   ${target.info.name} HP= ${renderHealthBar(target.resources.health, target.resources.maxHealth)} ${healthColor(target.resources.health)}/${target.resources.maxHealth}`,
   );
 };
 
 const printZeroHealth = (target) => {
   printspace();
-  console.log(`💀 ${target.info.name} HP= 0/${target.resources.maxHealth}`);
+  console.log(
+    `💀 ${target.info.name} HP= ${renderHealthBar(0, target.resources.maxHealth)} ${healthColor(0)}/${target.resources.maxHealth}`,
+  );
 };
 
 const printWrongInput = () => {
-  console.log("❌ Invalid command.");
+  printError("Invalid command.");
 };
 
 const printInvalidItem = () => {
-  console.log("❌ You don't have any consumable items.");
+  printError("You don't have any consumable items.");
 };
 
 const printEscaped = (combatState, penalty) => {
-  console.log("Battle End");
-  console.log(`${combatState.player.info.name} ran away from ${combatState.enemy.info.name}`);
+  printTitle("Battle End");
+  console.log(
+    `${combatState.player.info.name} ran away from ${combatState.enemy.info.name}`,
+  );
   console.log("You got lost while escaping"); // The monster forced you backward
   console.log(`+ ${penalty} steps`);
   printspace();
@@ -49,28 +85,35 @@ const printEscaped = (combatState, penalty) => {
 
 const printWon = (combatState) => {
   printTitle("Battle End");
-  console.log(`${combatState.player.info.name} defeated ${combatState.enemy.info.name}!`);
+  console.log(
+    `${playerColor(combatState.player.info.name)} defeated ${enemyColor(combatState.enemy.info.name)}!`,
+  );
   printspace();
-  console.log(`+ ${combatState.enemy.loot.exp} EXP`);
+  console.log(`+ ${expColor(combatState.enemy.loot.exp)} EXP`);
 };
 
 const printTip = () => {
-  console.log(`Tip= your health is low, heal yourself before enter new battle`);
+  console.log(
+    `${warning("Tip")}: your health is low, heal yourself before enter new battle`,
+  );
 };
 
 const printLost = (player) => {
-  console.log(`${player.info.name} has died, game over`);
+  printTitle("Game Over");
+  console.log(`${playerColor(player.info.name)} has died, game over`);
 };
 
 const printDefeated = (player, enemy) => {
-  console.log("Battle End");
-  console.log(`${enemy.info.name} killed ${player.info.name}`);
+  printTitle("Battle End");
+  console.log(
+    `${enemyColor(enemy.info.name)} killed ${playerColor(player.info.name)}`,
+  );
   printTitle("Game Over");
 };
 
 const printTurnOne = (enemy) => {
   console.log("⚔️ BATTLE STARTS!");
-  console.log(`You are fighting ${enemy.info.name}`);
+  console.log(`You are fighting ${enemyColor(enemy.info.name)}`);
 };
 
 const printPlayerStart = () => {
@@ -93,10 +136,11 @@ const printChoiceMenu = () => {
   return `
   choose an action=
 
-  [ A ] Attack
-  [ H ] Heal
-  [ R ] Run
-
+  ${renderKeys(`
+  [A] Attack
+  [H] Heal
+  [R] Run
+  `)}
   `;
   // [S] Skill
   // [D] Defend
@@ -105,15 +149,12 @@ const printChoiceMenu = () => {
 
 let printCombatHUD = (player, enemy) => {
   console.log(`
-========================
-⚔️ COMBAT STATUS
-========================
+${renderHeader("⚔️ COMBAT STATUS")}
+${playerColor(player.info.name)}
+❤️ HP: ${renderHealthBar(player.resources.health, player.resources.maxHealth)} ${healthColor(player.resources.health)}/${player.resources.maxHealth}
 
-${player.info.name}
-❤️ HP: ${player.resources.health}/${player.resources.maxHealth}
-
-${enemy.info.name}
-❤️ HP: ${enemy.resources.health}/${enemy.resources.maxHealth}
+${enemyColor(enemy.info.name)}
+❤️ HP: ${renderHealthBar(enemy.resources.health, enemy.resources.maxHealth)} ${healthColor(enemy.resources.health)}/${enemy.resources.maxHealth}
 
 ========================
 `);
@@ -126,7 +167,6 @@ const printChoiceItem = () => {
 const printContinueMenu = () => {
   return `\nPress Enter to continue...`;
 };
-
 
 module.exports = {
   printAttack,

@@ -16,12 +16,11 @@ const {
   characterStatsWindow,
 } = require("./utitls/renderCharacterIntro");
 const {
-  printMenu,
-  printMenuCity,
+  renderMenu,
+  renderMenuCity,
   printspace,
   printLoadMenu,
-  printInvalidInput,
-  printNoSaveFile,
+  printError,
   printSaveLoaded,
   printLeaveGame,
 } = require("./utitls/UIHelper");
@@ -51,10 +50,10 @@ let getMenu = () => {
   const currentArea = getCurrentArea();
 
   if (currentArea.type === "city") {
-    return printMenuCity();
+    return renderMenuCity();
   }
 
-  return printMenu();
+  return renderMenu();
 };
 
 // =========== MAIN ===========
@@ -86,7 +85,7 @@ let main = () => {
         routes[answer]();
         // =========== INVALID ===========
       } else {
-        printInvalidInput();
+        printError("Invalid Input");
 
         mainMenu();
       }
@@ -112,7 +111,7 @@ let main = () => {
         // ========== LOAD GAME ==========
       } else if (answer === "2") {
         if (!saveExists()) {
-          printNoSaveFile();
+          printError("No save file found.");
           startupMenu();
 
           return;
@@ -131,7 +130,7 @@ let main = () => {
 
         // ========== INVALID ==========
       } else {
-        printInvalidInput();
+        printError("Invalid Input");
         startupMenu();
       }
     });
