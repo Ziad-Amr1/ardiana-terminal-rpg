@@ -99,8 +99,7 @@ let showCurrentArea = () => {
     return;
   }
 
-  printTitle(currentArea.name);
-  console.log(currentArea.description);
+  currentArea.enterArea();
   if (currentArea.dangerLevel === 0) {
     console.log("This is a safe area.");
   } else {
