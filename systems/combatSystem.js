@@ -2,14 +2,16 @@ const { showInventoryBattle, getItem } = require("./inventorySystem");
 const { leveling } = require("./levelSystem");
 const { loot, dropItem } = require("./lootingSystem");
 const { dice, randomNumber } = require("../utitls/randoms");
-const { printDivider, printTitle, printspace } = require("../utitls/UIHelper");
+const combatUI = require("../utitls/combatUI");
+const { getCombatStats } = require("./playerSystem");
+const createCombatRoutrt = require("../routers/combatRouter");
 
 // =========== COMBAT SYSTEM ===========
 
 function takeDamage(target, amount) {
   target.resources.health -= amount;
 
-  console.log(`🩸 ${target.info.name} takes ${amount} damage!`);
+  combatUI.printTakeDamage(target, amount);
 
   // if (target.resources.health <= 0) {
   //   console.log(`${target.info.name} died`);
@@ -17,20 +19,45 @@ function takeDamage(target, amount) {
 }
 
 let attack = (attacker, target) => {
-  if (checkStatus(attacker)) {
-    console.log(`⚔️ ${attacker.info.name} attacks ${target.info.name}!`);
-    printspace();
-    takeDamage(target, attacker.combat.damage);
-    printspace();
-    if (target.resources.health > 0) {
-      console.log(
-        `❤️ ${target.info.name} HP: ${target.resources.health}/${target.resources.maxHealth}`,
-      );
-    } else {
-      console.log(`❤️ ${target.info.name} HP: 0/${target.resources.maxHealth}`);
-    }
+  // 1. لو الضارب ميت، ميكملش
+  if (!checkStatus(attacker)) {
+    combatUI.printDiedAlready(attacker);
+    return;
+  }
+
+  combatUI.printAttack(attacker, target);
+
+  // =========================================
+  // ⚙️ دمج نظام الإحصائيات (Stats System)
+  // =========================================
+
+  // 2. حساب قوة الهجوم (Attacker Damage)
+  let attackerDamage = attacker.combat.damage;
+  if (attacker.equipment) {
+    // لو الضارب عنده equipment (يعني هو اللاعب)، استخدم دالة الحسابات
+    attackerDamage = getCombatStats(attacker).damage;
+  }
+
+  // 3. حساب قوة الدفاع (Target Defense)
+  let targetDefense = 0;
+  if (target.equipment) {
+    // لو المضروب هو اللاعب، احسب دفاعه من الدروع
+    targetDefense = getCombatStats(target).defense;
+  }
+
+  // 4. حساب الضرر النهائي (الضربة - الدفاع)
+  // بنستخدم Math.max عشان نضمن إن الضربة متقلش عن 1، عشان مستحيل ضربة تزود دم الخصم!
+  let finalDamage = Math.max(1, attackerDamage - targetDefense);
+
+  // =========================================
+
+  // 5. تنفيذ الضربة بالرقم النهائي
+  takeDamage(target, finalDamage);
+  // 6. طباعة الدم المتبقي
+  if (target.resources.health > 0) {
+    combatUI.printRestHealth(target);
   } else {
-    console.log(`${attacker.info.name} has died already`);
+    combatUI.printZeroHealth(target);
   }
 };
 
@@ -51,11 +78,7 @@ let rolling = () => {
   }
 };
 
-let startBattle = (gamestate, enemy) => {
-  gamestate.currentBattle = {
-    enemy,
-    turnNumber: 1,
-  };
+let startBattle = () => {
   let turn = rolling();
   if (turn) {
     return "enemy";
@@ -68,53 +91,56 @@ let battle = (gamestate, rl, onExit, enemy) => {
   let player = gamestate.player;
 
   let battleStarter = startBattle(gamestate, enemy);
-  let msg = `
-  choose an action:
 
-  [ A ] Attack
-  [ H ] Heal
-  [ R ] Run
+  gamestate.currentBattle = {
+    player,
+    enemy,
+    battleStarter,
+    turnNumber: 1,
+  };
 
-  `;
-  // [S] Skill
-  // [D] Defend
-  // [I] Inventory
-  let turnNumber = gamestate.currentBattle.turnNumber;
+  const combatState = gamestate.currentBattle;
 
   let playerTurn = () => {
-    rl.question(msg, (answer) => {
+    rl.question(combatUI.printChoiceMenu(), (answer) => {
       answer = answer.trim().toLowerCase();
-      if (answer === "a") {
-        attack(player, enemy);
-        if (checkStatus(enemy)) {
-          if (battleStarter == "player") {
+
+      const playerAttack = () => {
+        attack(combatState.player, combatState.enemy);
+        if (checkStatus(combatState.enemy)) {
+          if (combatState.battleStarter == "player") {
             enemyTurn();
           } else {
-            turnNumber++;
-            gamestate.currentBattle.turnNumber++;
+            combatState.turnNumber++;
             startTurn();
           }
         } else {
           endBattle(2);
         }
-      } else if (answer === "h") {
-        inventoryTurn();
-      } else if (answer === "r") {
-        endBattle(1);
+      };
+
+      const combatRoutes = createCombatRoutrt({
+        combatState,
+        playerAttack,
+        inventoryTurn,
+        endBattle,
+      });
+      if (combatRoutes[answer]) {
+        combatRoutes[answer]();
       } else {
-        console.log("❌ Invalid command.");
+        combatUI.printWrongInput();
         playerTurn();
       }
     });
   };
 
   let enemyTurn = () => {
-    attack(enemy, player);
-    if (checkStatus(player)) {
-      if (battleStarter == "enemy") {
+    attack(combatState.enemy, combatState.player);
+    if (checkStatus(combatState.player)) {
+      if (combatState.battleStarter == "enemy") {
         playerTurn();
       } else {
-        turnNumber++;
+        combatState.turnNumber++;
         startTurn();
       }
     } else {
@@ -123,22 +149,22 @@ let battle = (gamestate, rl, onExit, enemy) => {
   };
 
   let inventoryTurn = () => {
-    if (showInventoryBattle(player) === false) {
-      console.log(`❌ You don't have any consumable items.`);
+    if (showInventoryBattle(combatState.player) === false) {
+      combatUI.printInvalidItem();
       playerTurn();
     } else {
-      showInventoryBattle(player);
-      rl.question(`Choose an item to use: `, (answer) => {
+      showInventoryBattle(combatState.player);
+      rl.question(combatUI.printChoiceItem(), (answer) => {
         answer = Number(answer);
-        let used = getItem(player, answer);
+        let used = getItem(combatState.player, answer);
         if (!used) {
           inventoryTurn();
           return;
         }
-        if (battleStarter == "player") {
+        if (combatState.battleStarter == "player") {
           enemyTurn();
         } else {
-          turnNumber++;
+          combatState.turnNumber++;
           startTurn();
         }
       });
@@ -148,64 +174,56 @@ let battle = (gamestate, rl, onExit, enemy) => {
   let endBattle = (status) => {
     if (status === 1) {
       // player escaped
-      console.log("Battle End");
-      console.log(`${player.info.name} ran away from ${enemy.info.name}`);
-      console.log("You got lost while escaping"); // The monster forced you backward
       const penalty = randomNumber(1, 2);
-      console.log(`+ ${penalty} steps`);
+      combatUI.printEscaped(combatState, penalty);
       gamestate.travel.remainingSteps += penalty;
-      printspace();
       gamestate.currentBattle = null;
       onExit();
       return;
     } else if (status === 2) {
       // player won -- enemy died
-      printTitle("Battle End");
-      console.log(`${player.info.name} defeated ${enemy.info.name}!`);
-      printspace();
-      console.log(`+ ${enemy.loot.exp} EXP`);
-      loot(player, enemy.loot.coins);
-      player.progression.exp += enemy.loot.exp;
-      leveling(player);
-      dropItem(player, enemy);
-      if (player.resources.health <= player.resources.maxHealth / 2) {
-        console.log(
-          `Tip: your health is low, heal yourself before enter new battle`,
-        );
+      combatUI.printWon(combatState);
+      loot(combatState.player, combatState.enemy.loot.coins);
+      combatState.player.progression.exp += combatState.enemy.loot.exp;
+      leveling(combatState.player);
+      dropItem(combatState.player, combatState.enemy);
+      if (
+        combatState.player.resources.health <=
+        combatState.player.resources.maxHealth / 2
+      ) {
+        combatUI.printTip();
       }
       gamestate.currentBattle = null;
-      if (checkStatus(player)) {
-        rl.question("\nPress Enter to continue...", () => {
+      if (checkStatus(combatState.player)) {
+        rl.question(combatUI.printContinueMenu(), () => {
           onExit();
         });
         return;
       } else {
-        console.log(`${player.info.name} has died, game over`);
+        combatUI.printLost(combatState.player);
         process.exit(0);
       }
     } else if (status === 3) {
       // player died -- game over
-      console.log("Battle End");
-      console.log(`${enemy.info.name} killed ${player.info.name}`);
-      printTitle("Game Over");
+      combatUI.printDefeated(combatState.player, combatState.enemy);
       gamestate.currentBattle = null;
       process.exit(0);
     }
   };
 
-  if (turnNumber === 1) {
-    console.log("⚔️ BATTLE STARTS!");
-    console.log(`You are fighting ${enemy.info.name}`);
-    if (battleStarter == "enemy") {
-      console.log("⚔️ The enemy moves first!");
+  if (combatState.turnNumber === 1) {
+    combatUI.printTrunOne(combatState.enemy);
+    if (combatState.battleStarter == "enemy") {
+      combatUI.printEnemyStart();
     } else {
-      console.log("⚔️ You move first!");
+      combatUI.printPlayerStart();
     }
   }
 
   let startTurn = () => {
-    printTitle(`TURN ${turnNumber}`);
-    if (battleStarter == "enemy") {
+    combatUI.printStartTurnPrint(combatState);
+
+    if (combatState.battleStarter == "enemy") {
       enemyTurn();
     } else {
       playerTurn();
