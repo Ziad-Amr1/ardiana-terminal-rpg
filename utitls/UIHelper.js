@@ -53,6 +53,7 @@ ${renderKeys(`
 [B] Blacksmith
 [N] NPCs
 [L] Stats
+[I] Inventory
 [Q] Quit`)}
 
 ========================
@@ -84,6 +85,14 @@ ${renderKeys(`
 ========================
 
 `);
+};
+
+const renderContinueMenu = () => {
+  return `\nPress Enter to continue...`;
+};
+
+const renderBackPrompt = () => {
+  return "\nPress Enter to return...";
 };
 
 let printspace = () => {
@@ -118,5 +127,7 @@ module.exports = {
   printSaveLoaded,
   printLeaveGame,
   renderKeys,
-  renderHeader, 
+  renderHeader,
+  renderContinueMenu,
+  renderBackPrompt,
 };

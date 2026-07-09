@@ -1,3 +1,4 @@
+// ./routers/mainMenuRouter.js
 // =========== Routes ==============
 const createMainMenuRouter = (prep) => {
   return {
@@ -14,15 +15,24 @@ const createMainMenuRouter = (prep) => {
       prep.mainMenu();
     },
     h: () => {
-      prep.showInventory(prep.gamestate.player);
+      prep.openInventory(prep.gamestate, prep.rl, prep.mainMenu);
 
       prep.mainMenu();
     },
     l: () => {
-      prep.showLevel(prep.gamestate);
+      // prep.showLevel(prep.gamestate);
       prep.characterStatsWindow(prep.gamestate.player);
 
-      prep.mainMenu();
+      prep.rl.question(prep.renderBackPrompt(), () => {
+        prep.mainMenu();
+      });
+    },
+    i: () => {
+      prep.openInventory(
+        prep.gamestate,
+        prep.rl,
+        prep.mainMenu
+      );
     },
     t: () => {
       prep.rest(prep.gamestate, prep.rl, prep.mainMenu);

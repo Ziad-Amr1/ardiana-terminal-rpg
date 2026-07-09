@@ -1,7 +1,8 @@
+// ./app.js
 // =========== IMPORTS ===========
 const gamestate = require("./state/gameState");
 const { battle } = require("./systems/combatSystem");
-const { showInventory } = require("./systems/inventorySystem");
+const { showInventory, openInventory } = require("./systems/inventorySystem");
 const { showLevel } = require("./systems/levelSystem");
 const { choiceEnemy } = require("./systems/spawningSystem");
 const { getCurrentArea } = require("./systems/areaSystem");
@@ -23,6 +24,7 @@ const {
   printError,
   printSaveLoaded,
   printLeaveGame,
+  renderBackPrompt,
 } = require("./utitls/UIHelper");
 const { rest } = require("./systems/restSystem");
 const { startDialogue } = require("./systems/dialogueSystem");
@@ -79,6 +81,8 @@ let main = () => {
         choiceEnemy,
         getCurrentArea,
         showInventory,
+        renderBackPrompt,
+        openInventory,
       });
 
       if (routes[answer]) {
