@@ -9,7 +9,7 @@ const slime = new Enemy({
   damage: 2,
   coins: 8,
   exp: 12,
-  loot: [{ id: "slime_drop", name: "Slime Drop", DR: 20 }],
+  loot: [{ id: "slime_goo", name: "Slime Goo", DR: 20 }],
   area_id: "abandoned_forest"
 });
 
@@ -20,7 +20,7 @@ const goblin = new Enemy({
   damage: 4,
   coins: 15,
   exp: 20,
-  loot: [{ id: "goblin_leather", name: "Goblin Leather", DR: 20 }],
+  loot: [{ id: "goblin_tooth", name: "Goblin Tooth", DR: 20 }, { id: "goblin_leather", name: "Goblin Leather", DR: 20 }],
   area_id: "abandoned_forest"
 });
 
@@ -31,7 +31,7 @@ const skeletonSolider = new Enemy({
   damage: 8,
   coins: 30,
   exp: 40,
-  loot: [{ id: "rusty_iron_sword", name: "Rusty iron sword", DR: 20 }],
+  loot: [{ id: "rusty_iron_sword", name: "Rusty iron sword", DR: 20 }, { id: "skeleton_bone", name: "Skeleton Bone", DR: 20 }],
   area_id: "abandoned_forest"
 });
 

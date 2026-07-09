@@ -1,4 +1,4 @@
-const { Item, Equipment } = require("../factories/createItem");
+const { Item, Equipment, Weapon } = require("../factories/createItem");
 
 // ========== CREATE ENTITIES ===========
 
@@ -13,13 +13,35 @@ let smallHealthPotion = new Item({
   maxStack: 99
 });
 
-let rustyIronSword = new Equipment({
+let rustyIronSword = new Weapon({
   id: "rusty_iron_sword",
   name: "Rusty Iron Sword",
   description: "sword made of iron, but it's old and rusty",
-  value: 150,
   slot: "weapon",
-  statsBonus: { damage: 10 }
+  value: 150,
+  rarity: "common",
+  slot: "weapon",
+  
+  statsBonus: { STR: 1, DEX: 1 },
+  requirements: { level: 1, stats: { STR: 5 } },
+  durability: { current: 100, max: 100 },
+  weaponStats: { damage: 25 },
+  specialEffects: [],
+});
+
+let magicFireSword = new Weapon({
+  id: "magic_fire_sword",
+  name: "Magic Fire Sword",
+  description: "A magical sword infused with fire energy.",
+  slot: "weapon",
+  value: 1000,
+  rarity: "rare",
+
+  statsBonus: { STR: 2, WIS: 1 },
+  requirements: { level: 3, stats: { STR: 7 } },
+  durability: { current: 100, max: 100 },
+  weaponStats: { damage: 55, critChance: 10, critDamage: 1.5 },
+  specialEffects: [{ type: "burn", chance: 25, damage: 5, duration: 3 }],
 });
 
 let goblinLeather = new Item({
@@ -32,10 +54,30 @@ let goblinLeather = new Item({
   maxStack: 99
 });
 
-let slimedrop = new Item({
-  id: "slime_drop",
-  name: "Slime Drop",
-  description: "slime drop, it can be used in alchemy to make potion",
+let goblinTooth = new Item({
+  id: "goblin_tooth",
+  name: "Goblin Tooth",
+  description: "tooth from a goblin, it can be used to make accessories",
+  category: "gathering",
+  value: 10,
+  stackable: true,
+  maxStack: 99
+});
+
+let slimegoo = new Item({
+  id: "slime_goo",
+  name: "Slime Goo",
+  description: "slime goo, it can be used in alchemy to make potion",
+  category: "gathering",
+  value: 10,
+  stackable: true,
+  maxStack: 99
+});
+
+let skeletonBone = new Item({
+  id: "skeleton_bone",
+  name: "Skeleton Bone",
+  description: "bone from a skeleton, it can be used to make accessories",
   category: "gathering",
   value: 10,
   stackable: true,
