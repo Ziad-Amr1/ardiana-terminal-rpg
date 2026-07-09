@@ -39,7 +39,7 @@ class Equipment extends Item {
         // upgradeLevel
         // enchantments
 class Weapon extends Equipment {
-  constructor({ id, name, description, value, effect, stackable, maxStack, quantity, rarity, slot, statsBonus, requirements, durability, weaponStats, specialEffects,
+  constructor({ id, name, description, value, effect, stackable, maxStack, quantity, rarity, statsBonus, requirements, durability, weaponStats, specialEffects,
   }) {
     super({ id, name, description, value, effect, stackable, maxStack, quantity, rarity, subCategory: "weapon", slot: "weapon", statsBonus, requirements, durability,
     });

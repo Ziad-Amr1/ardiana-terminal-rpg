@@ -26,7 +26,10 @@ const serializeEquipment = (state) => {
     accessory: equipment.accessory,
   };
   if (equipment.weapon) {
-    equipmentData.weapon = equipment.weapon.id;
+    equipmentData.weapon = {
+      id: equipment.weapon.id,
+      durability: equipment.weapon.durability,
+    };
   } else {
     equipmentData.weapon = null;
   }
@@ -90,12 +93,19 @@ const deserializeEquipment = (savedEquipment) => {
   }
 
   const savedWeapon = () => {
-    let weapon = savedEquipment.weapon;
-    if (weapon) {
-      weapon = structuredClone(itemRegistry[weapon]);
-      return weapon;
+    const weapon = savedEquipment.weapon;
+
+    if (!weapon) {
+      return null;
     }
+
+    const weaponData = structuredClone(itemRegistry[weapon.id]);
+
+    weaponData.durability = weapon.durability;
+
+    return weaponData;
   };
+  
   const savedArmor = () => {
     let armor = savedEquipment.armor;
     if (armor) {
