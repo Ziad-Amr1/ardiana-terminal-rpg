@@ -4,8 +4,8 @@ const dialogues = {
   "merchant_greeting": {
     id: "merchant_greeting",
     npcId: 1,
-    text: "Hello Traveler, how are you? \nWhat brings you today?",
-    cd: 50, // خليتها 50 ملي ثانية كمثال لسرعة معقولة
+    text: "Hello Traveler, how are you? \nWhat brings you today?\n",
+    cd: 50, // cd = characters per second
     choices: [
       { 
         reply: "Hello, I came to buy something.", 
@@ -21,7 +21,7 @@ const dialogues = {
   "blacksmith_greeting": {
     id: "blacksmith_greeting",
     npcId: 2, // ربطناه بالحداد (Frank)
-    text: "Ah! A new face. Need to repair your sword or craft a new one?",
+    text: "Ah! A new face. Need to repair your sword or craft a new one?\n",
     cd: 50,
     choices: [
       { reply: "Show me your weapons.", nextAction: "OPEN_BLACKSMITH" },
