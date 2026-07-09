@@ -1,3 +1,4 @@
+// ./systems/combatSystem.js
 const { showInventoryBattle, getItem } = require("./inventorySystem");
 const { leveling } = require("./levelSystem");
 const { loot, dropItem } = require("./lootingSystem");
@@ -9,13 +10,13 @@ const createCombatRoutrt = require("../routers/combatRouter");
 // =========== COMBAT SYSTEM ===========
 
 function takeDamage(target, amount) {
+  const previousHealth = target.resources.health;
+
   target.resources.health = Math.max(0, target.resources.health - amount);
 
-  combatUI.printTakeDamage(target, amount);
+  const actualDamageTaken = previousHealth - target.resources.health;
 
-  // if (target.resources.health <= 0) {
-  //   console.log(`${target.info.name} died`);
-  // }
+  combatUI.printTakeDamage(target, actualDamageTaken);
 }
 
 let attack = (attacker, target) => {
