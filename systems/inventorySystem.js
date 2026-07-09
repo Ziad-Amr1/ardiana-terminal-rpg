@@ -1,107 +1,26 @@
+// ./systems/inventorySystem.js
+
+// =========== IMPORTS ===========
 const { restoreHealth } = require("./playerSystem");
-const { printDivider, printTitle, printspace } = require("../utitls/UIHelper");
+const {
+  printDivider,
+  printTitle,
+  printspace,
+  printError,
+} = require("../utitls/UIHelper");
+const { printUsedItem, printEmptyInventory, printInventory, printInspectItem, renderSelectedItem, renderOpenInventory } = require("../utitls/inventoryUI");
+const EquipmentSystem = require("./equipmentSystem");
+const { addItem, removeItem } = require("./itemStorageSystem");
+
+// =========== constants ===========
+const errorMessage = "Invalid Item.";
 
 // ========== INVENTORY SYSTEM ===========
-let addItem = (player, item, quantity = 1) => {
-  // Guard Clause
-  if (item === undefined) {
-    console.log("❌ Invalid Item.");
-    return false;
-  }
-  let clonedItem = { ...item };
-  if (player.inventory.length < 20) {
-    if (clonedItem.stackable) {
-      let itemInInventory = player.inventory.find(
-        (i) => i.id === clonedItem.id,
-      );
-      if (!itemInInventory) {
-        clonedItem.quantity = quantity;
-        player.inventory.push(clonedItem);
-        console.log(`You added ${clonedItem.name} to your inventory.`);
-        return true;
-      }
-      if (itemInInventory.quantity + quantity <= itemInInventory.maxStack) {
-        itemInInventory.quantity += quantity;
-        console.log(
-          `You added ${quantity} ${clonedItem.name} to your inventory.`,
-        );
-        return true;
-      } else {
-        clonedItem.quantity = quantity;
-        player.inventory.push(clonedItem);
-        console.log(
-          `You added ${quantity} ${clonedItem.name} to your inventory.`,
-        );
-        return true;
-      }
-    } else {
-      clonedItem.quantity = quantity;
-      player.inventory.push(clonedItem);
-      console.log(`You added ${clonedItem.name} to your inventory.`);
-      return true;
-    }
-  } else {
-    console.log("❌ Your inventory is full.");
-    return false;
-  }
-};
-
-
-let removeItem = (player, item, quantity = 1) => {
-  // 1. Guard Clause (item is not undefined)
-  if (item === undefined) {
-    console.log("❌ Invalid Item.");
-    return false;
-  }
-
-  // 2. if Inventory is empty
-  if (player.inventory.length === 0) {
-    console.log("Your inventory is empty.");
-    return false;
-  }
-
-  // 3. Find the item index once
-  let itemIndex = player.inventory.findIndex(i => i.id === item.id);
-
-  if (itemIndex !== -1) {
-    let itemInInventory = player.inventory[itemIndex];
-
-    // 4. Handle Stackable items (like potions)
-    if (itemInInventory.stackable) {
-      // Guard: Trying to remove more than what exists
-      if (itemInInventory.quantity < quantity) {
-        console.log("❌ You don't have that many.");
-        return false;
-      }
-
-      // Logic: Exact amount vs Partial amount
-      if (itemInInventory.quantity === quantity) {
-        player.inventory.splice(itemIndex, 1);
-      } else {
-        itemInInventory.quantity -= quantity;
-      }
-      
-      console.log(`You removed ${quantity} ${itemInInventory.name} from your inventory.`);
-      return true;
-
-    } else {
-      // 5. Handle Non-stackable items (like weapons)
-      player.inventory.splice(itemIndex, 1);
-      console.log(`You removed ${itemInInventory.name} from your inventory.`);
-      return true;
-    }
-
-  } else {
-    // Item not found in inventory at all
-    console.log("❌ You don't have that item.");
-    return false;
-  }
-};
 
 let useItem = (player, item) => {
   if (item.category === "consumable") {
     if (item.effect["healAmount"]) {
-      console.log(`${player.info.name} uses ${item.name}`);
+      printUsedItem(player, item);
       restoreHealth(player, item.effect.healAmount);
       removeItem(player, item);
     }
@@ -110,7 +29,7 @@ let useItem = (player, item) => {
 
 let showInventory = (player) => {
   if (player.inventory.length === 0) {
-    console.log("Your inventory is empty");
+    printEmptyInventory(player);
   } else {
     printInventory(player);
   }
@@ -133,28 +52,95 @@ let getItem = (player, number) => {
   );
   let item = consumables[number - 1];
   if (!item) {
-    console.log("❌ Invalid item.");
+    printError(errorMessage);
     return false;
   }
   useItem(player, item);
   return true;
 };
 
-let printInventory = (player, category) => {
-  printTitle("Your inventory:");
-  printspace();
-  let i = 1;
-  player.inventory.forEach((item) => {
-    if (category != null) {
-      if (item.category === category) {
-        console.log(`${i} - ${item.name} - ${item.description}`);
-        printspace();
-        i++;
+let openInventory;
+
+const selectedItem = (player, itemIndex, rl, gamestate, onExit) => {
+  const item = player.inventory[itemIndex];
+  const msg = renderSelectedItem(item);
+  rl.question(msg, (answer) => {
+    answer = answer.trim().toLowerCase();
+    if (answer === "c" && item.category === "consumable") {
+      useItem(player, item);
+      openInventory(gamestate, rl, onExit);
+      return;
+    } else if (answer === "e" && item.category === "equipment") {
+      EquipmentSystem.equipItem(player, item);
+      openInventory(gamestate, rl, onExit);
+      return;
+    } else if (answer === "d") {
+      // dropItem(player, item);
+      removeItem(player, item);
+      openInventory(gamestate, rl, onExit);
+      return;
+    } else if (answer === "n") {
+      if (itemIndex === player.inventory.length - 1) {
+        itemIndex = 0;
+      } else {
+        itemIndex++;
       }
+
+      selectedItem(player, itemIndex, rl, gamestate, onExit);
+      return;
+    } else if (answer === "p") {
+      if (itemIndex === 0) {
+        itemIndex = player.inventory.length - 1;
+      } else {
+        itemIndex--;
+      }
+
+      selectedItem(player, itemIndex, rl, gamestate, onExit);
+      return;
+    } else if (answer === "i") {
+      printInspectItem(player, item);
+      rl.question("Press Enter to go back...", () => {
+        selectedItem(player, itemIndex, rl, gamestate, onExit);
+      });
+      return;
+    } else if (answer === "b") {
+      openInventory(gamestate, rl, onExit);
+      return;
     } else {
-      console.log(`${i} - ${item.name} - ${item.description}`);
-      printspace();
-      i++;
+      printError("Invalid input.");
+      selectedItem(player, itemIndex, rl, gamestate, onExit);
+    }
+    //splt later
+  });
+};
+
+openInventory = (gamestate, rl, onExit) => {
+  const player = gamestate.player;
+
+  let message = renderOpenInventory(player);
+
+  showInventory(player);
+
+
+  rl.question(message, (answer) => {
+    answer = answer.trim().toLowerCase();
+
+    if (answer === "b") {
+      onExit();
+      return;
+    } else {
+      const itemIndex = Number(answer) - 1;
+      if (
+        Number.isInteger(itemIndex) &&
+        itemIndex >= 0 &&
+        itemIndex <= player.inventory.length - 1
+      ) {
+        selectedItem(player, itemIndex, rl, gamestate, onExit);
+        return;
+      } else {
+        printError("Invalid input.");
+        openInventory(gamestate, rl, onExit);
+      }
     }
   });
 };
@@ -166,4 +152,5 @@ module.exports = {
   showInventory,
   showInventoryBattle,
   getItem,
+  openInventory,
 };

@@ -1,61 +1,60 @@
-`
-Equipment System
+// ./systems/equipmentSystem.js
+// =========== EQUIPMENT SYSTEM ===========
 
-1. item should have:
-- type (weapon, armor, accessory)
-- Stat Modifiers / effects 
-- Constraints (can't equip if already equipped) / level requirements
+/*
+Responsibilities:
+- Validate whether an item can be equipped.
+- Manage equipping and unequipping items.
+- Move items between inventory and equipment.
+- Equip items.
+- Unequip items.
 
-2. Define equipment Slots
-if he equipe a helment, he cant equip another helmet
-he should remove it first(made it back to inventory and remove the effect)
+Not Responsible For:
+- Calculating final combat stats.
+- Applying combat damage.
+- Rendering UI.
+*/
 
-3. (The Golden Rule of Stats)
-`
+// =========== IMPORTS ===========
 
-// ملف: equipmentSystem.js
+const { printError } = require("../utitls/UIHelper");
+const { addItem, removeItem } = require("./itemStorageSystem");
+
+// =========== VALIDATION HELPERS ===========
+
+// =========== EQUIPMENT ACTIONS ===========
+
 
 const EquipmentSystem = {
     
-    // الدالة بتاخد كائن اللاعب كائن الأداة من بره
     equipItem: (player, item) => {
         if (!player.equipment.hasOwnProperty(item.slot)) {
-            console.log("لا يوجد مكان مخصص لهذه الأداة!");
+            printError("Invalid Slot.");
             return;
         }
 
         if (player.equipment[item.slot] !== null) {
             EquipmentSystem.unequipItem(player, item.slot);
+            // CalcStatsSystem or playerSystem
         }
 
         player.equipment[item.slot] = item;
+        removeItem(player, item);
         console.log(`you equiped ${item.name} 🎒`);
+        // CalcStatsSystem or playerSystem
     },
 
     unequipItem: (player, slotName) => {
         const itemToRemove = player.equipment[slotName];
         if (itemToRemove) {
-            player.inventory.push(itemToRemove);
+            // player.inventory.push(itemToRemove);
             player.equipment[slotName] = null;
             console.log(`you unequiped ${itemToRemove.name} 🎒`);
+            addItem(player, itemToRemove);
+            // CalcStatsSystem or playerSystem
         }
     },
 
-    getTotalStats: (player) => {
-        let total = { ...player.base_stats };
-
-        for (let slot in player.equipment) {
-            let item = player.equipment[slot];
-            if (item !== null && item.statsBonus) {
-                for (let statName in item.statsBonus) {
-                    if (total[statName]) {
-                        total[statName] += item.statsBonus[statName];
-                    }
-                }
-            }
-        }
-        return total;
-    }
 };
 
 module.exports = EquipmentSystem;
