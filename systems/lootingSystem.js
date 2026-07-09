@@ -1,5 +1,5 @@
 const { randomNumber } = require("../utitls/randoms");
-const { addItem } = require("./inventorySystem");
+const { addItem } = require("./itemStorageSystem");
 const { allInGameItems } = require("../factories/createItem");
 
 function loot(target, amount) {

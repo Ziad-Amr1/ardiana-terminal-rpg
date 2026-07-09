@@ -1,7 +1,7 @@
 // const gameState = require("../state/gameState");
 // let player = gameState.player;
 // const allInGameItems = require("../factories/createItem");
-const {addItem, removeItem} = require("./inventorySystem");
+const {addItem, removeItem} = require("./itemStorageSystem");
 
 // =================== ECONOMY SYSTEM ===================
 let takeCoins = (target, coins) => {
