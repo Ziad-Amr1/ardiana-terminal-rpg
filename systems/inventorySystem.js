@@ -1,53 +1,78 @@
 // ./systems/inventorySystem.js
 
 // =========== IMPORTS ===========
-const { restoreHealth } = require("./playerSystem");
+const { restoreHealth, restoreMana } = require("./playerSystem");
+const { printError } = require("../utils/UIHelper");
 const {
-  printDivider,
-  printTitle,
-  printspace,
-  printError,
-} = require("../utitls/UIHelper");
-const { printUsedItem, printEmptyInventory, printInventory, printInspectItem, renderSelectedItem, renderOpenInventory } = require("../utitls/inventoryUI");
+  printUsedItem,
+  printEmptyInventory,
+  printInventory,
+  printInspectItem,
+  renderSelectedItem,
+  renderOpenInventory,
+} = require("../utils/inventoryUI");
 const EquipmentSystem = require("./equipmentSystem");
 const { addItem, removeItem } = require("./itemStorageSystem");
+const { resolveItem } = require("./itemResolver");
+const { t } = require("../i18n");
 
 // =========== constants ===========
-const errorMessage = "Invalid Item.";
+const errorMessage = t("inventory.error.InvalidItem");
 
 // ========== INVENTORY SYSTEM ===========
 
-let useItem = (player, item) => {
+const invForAction = (inventory) => {
+  return inventory.map((item) => resolveItem(item));
+};
+
+let useItem = (player, item, itemIndex) => {
   if (item.category === "consumable") {
-    if (item.effect["healAmount"]) {
-      printUsedItem(player, item);
-      restoreHealth(player, item.effect.healAmount);
-      removeItem(player, item);
+    if (!item.effects || item.effects.length === 0) {
+      return;
     }
+    printUsedItem(player, item);
+
+    setTimeout(() => {
+      switch (item.effects[0].type) {
+        case "instantHeal":
+          restoreHealth(player, item.effects[0].amount);
+          break;
+
+        case "restoreMana":
+          restoreMana(player, item.effects[0].amount);
+          break;
+        default:
+          return;
+      }
+
+      removeItem(player, item, itemIndex);
+    }, 1000);
   }
 };
 
 let showInventory = (player) => {
-  if (player.inventory.length === 0) {
+  const inventoryList = invForAction(player.inventory);
+  if (inventoryList.length === 0) {
     printEmptyInventory(player);
   } else {
-    printInventory(player);
+    printInventory(inventoryList);
   }
 };
 
 let showInventoryBattle = (player) => {
+  const inventoryList = invForAction(player.inventory);
   if (
-    player.inventory.filter((item) => item.category === "consumable").length ===
-    0
+    inventoryList.filter((item) => item.category === "consumable").length === 0
   ) {
     return false;
   } else {
-    printInventory(player, "consumable");
+    printInventory(inventoryList, "consumable");
   }
 };
 
 let getItem = (player, number) => {
-  let consumables = player.inventory.filter(
+  let inventoryList = invForAction(player.inventory);
+  let consumables = inventoryList.filter(
     (item) => item.category === "consumable",
   );
   let item = consumables[number - 1];
@@ -55,28 +80,42 @@ let getItem = (player, number) => {
     printError(errorMessage);
     return false;
   }
-  useItem(player, item);
+  let count = number - 1;
+
+  let getConsumableIndex = (inventoryList) => {
+    for (let i = 0; i < inventoryList.length; i++) {
+      if (inventoryList[i].category === "consumable" && count === 0) {
+        return i;
+      } else if (inventoryList[i].category === "consumable" && count > 0) {
+        count--;
+      } else {
+        continue;
+      }
+    }
+  };
+  let itemIndex = getConsumableIndex(inventoryList);
+  useItem(player, item, itemIndex);
   return true;
 };
 
 let openInventory;
 
 const selectedItem = (player, itemIndex, rl, gamestate, onExit) => {
-  const item = player.inventory[itemIndex];
+  const item = resolveItem(player.inventory[itemIndex]);
   const msg = renderSelectedItem(item);
   rl.question(msg, (answer) => {
     answer = answer.trim().toLowerCase();
     if (answer === "c" && item.category === "consumable") {
-      useItem(player, item);
+      useItem(player, item, itemIndex);
       openInventory(gamestate, rl, onExit);
       return;
     } else if (answer === "e" && item.category === "equipment") {
-      EquipmentSystem.equipItem(player, item);
+      EquipmentSystem.equipItem(player, item, itemIndex);
       openInventory(gamestate, rl, onExit);
       return;
     } else if (answer === "d") {
       // dropItem(player, item);
-      removeItem(player, item);
+      removeItem(player, item, itemIndex);
       openInventory(gamestate, rl, onExit);
       return;
     } else if (answer === "n") {
@@ -98,8 +137,8 @@ const selectedItem = (player, itemIndex, rl, gamestate, onExit) => {
       selectedItem(player, itemIndex, rl, gamestate, onExit);
       return;
     } else if (answer === "i") {
-      printInspectItem(player, item);
-      rl.question("Press Enter to go back...", () => {
+      printInspectItem(item);
+      rl.question(" ", () => {
         selectedItem(player, itemIndex, rl, gamestate, onExit);
       });
       return;
@@ -121,7 +160,6 @@ openInventory = (gamestate, rl, onExit) => {
 
   showInventory(player);
 
-
   rl.question(message, (answer) => {
     answer = answer.trim().toLowerCase();
 
@@ -138,7 +176,7 @@ openInventory = (gamestate, rl, onExit) => {
         selectedItem(player, itemIndex, rl, gamestate, onExit);
         return;
       } else {
-        printError("Invalid input.");
+        printError(errorMessage);
         openInventory(gamestate, rl, onExit);
       }
     }
@@ -146,8 +184,6 @@ openInventory = (gamestate, rl, onExit) => {
 };
 
 module.exports = {
-  addItem,
-  removeItem,
   useItem,
   showInventory,
   showInventoryBattle,

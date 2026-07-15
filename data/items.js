@@ -1,217 +1,399 @@
-const { Item, Equipment, Weapon } = require("../factories/createItem");
+// ./data/items.js
 
-// ========== CREATE ENTITIES ===========
+const {
+  Equipment,
+  Weapon,
+  Armor,
+  Consumable,
+  Material,
+} = require("../factories/createItem");
 
-let smallHealthPotion = new Item({
+/*
+ITEM DEFINITIONS
+
+├── Consumables
+│   └── Potions
+│
+├── Materials
+│   ├── Gathering
+│   └── Drops
+│
+└── Equipment
+    ├── Weapons
+    ├── Armor
+    └── Accessories
+*/
+
+// ============================================================
+// CONSUMABLES
+// ============================================================
+
+// -------------------- Potions --------------------
+
+const smallHealthPotion = new Consumable({
   id: "small_health_potion",
   name: "Small Health Potion",
-  description: "small magic potion used to restore small amount of Health",
-  category: "consumable",
-  value: 40,
-  effect: { healAmount: 5 },
-  stackable: true,
-  maxStack: 99
-});
-
-let rustyIronSword = new Weapon({
-  id: "rusty_iron_sword",
-  name: "Rusty Iron Sword",
-  description: "sword made of iron, but it's old and rusty",
-  slot: "weapon",
-  value: 150,
+  description: "A small magical potion that restores a small amount of Health.",
   rarity: "common",
-  slot: "weapon",
-  
-  statsBonus: { STR: 1, DEX: 1 },
-  requirements: { level: 1, stats: { STR: 5 } },
-  durability: { current: 100, max: 100 },
-  weaponStats: { damage: 25 },
-  specialEffects: [],
-});
-
-let magicFireSword = new Weapon({
-  id: "magic_fire_sword",
-  name: "Magic Fire Sword",
-  description: "A magical sword infused with fire energy.",
-  slot: "weapon",
-  value: 1000,
-  rarity: "rare",
-
-  statsBonus: { STR: 2, WIS: 1 },
-  requirements: { level: 3, stats: { STR: 7 } },
-  durability: { current: 100, max: 100 },
-  weaponStats: { damage: 55, critChance: 10, critDamage: 1.5 },
-  specialEffects: [{ type: "burn", chance: 25, damage: 5, duration: 3 }],
-});
-
-let goblinLeather = new Item({
-  id: "goblin_leather",
-  name: "Goblin Leather",
-  description: "leather from a goblin, it can be used to make armor",
-  category: "gathering",
-  value: 25,
+  buyPrice: 30,
+  sellPrice: 15,
   stackable: true,
-  maxStack: 99
+  maxStack: 99,
+  subCategory: "potion",
+  effects: [{ type: "instantHeal", amount: 10 }],
 });
 
-let goblinTooth = new Item({
-  id: "goblin_tooth",
-  name: "Goblin Tooth",
-  description: "tooth from a goblin, it can be used to make accessories",
-  category: "gathering",
-  value: 10,
-  stackable: true,
-  maxStack: 99
-});
-
-let slimegoo = new Item({
-  id: "slime_goo",
-  name: "Slime Goo",
-  description: "slime goo, it can be used in alchemy to make potion",
-  category: "gathering",
-  value: 10,
-  stackable: true,
-  maxStack: 99
-});
-
-let skeletonBone = new Item({
-  id: "skeleton_bone",
-  name: "Skeleton Bone",
-  description: "bone from a skeleton, it can be used to make accessories",
-  category: "gathering",
-  value: 10,
-  stackable: true,
-  maxStack: 99
-});
-
-let orcLeather = new Item({
-  id: "orc_leather",
-  name: "Orc Leather",
-  description: "leather from an orc, it can be used to make armor",
-  category: "gathering",
-  value: 80,
-  stackable: true,
-  maxStack: 99
-});
-
-let orcTeeth = new Item({
-  id: "orc_teeth",
-  name: "Orc Teeth",
-  description: "teeth from an orc, it can be used to make armor",
-  category: "gathering",
-  value: 60,
-  stackable: true,
-  maxStack: 99
-});
-
-
-// ==========================================
-// 🧪 الموارد الاستهلاكية (Consumables)
-// ==========================================
-new Item({
+new Consumable({
   id: "medium_health_potion",
   name: "Medium Health Potion",
-  description: "A glowing red potion that restores a decent amount of Health.",
-  category: "consumable",
-  value: 100,
-  effect: { healAmount: 20 },
+  description: "A glowing red potion that restores a moderate amount of Health.",
+  rarity: "common",
+  buyPrice: 80,
+  sellPrice: 40,
   stackable: true,
-  maxStack: 99
+  maxStack: 99,
+  subCategory: "potion",
+  effects: [{ type: "instantHeal", amount: 25 }],
 });
 
-new Item({
+new Consumable({
   id: "small_mana_potion",
   name: "Small Mana Potion",
-  description: "A blue vial that restores a small amount of Mana.",
-  category: "consumable",
-  value: 50,
-  effect: { restoreMana: 10 },
+  description: "A small blue potion that restores a small amount of Mana.",
+  rarity: "common",
+  buyPrice: 35,
+  sellPrice: 15,
   stackable: true,
-  maxStack: 99
+  maxStack: 99,
+  subCategory: "potion",
+  effects: [{ type: "restoreMana", amount: 10 }],
 });
 
-// ==========================================
-// ⚔️ الأسلحة (Weapons)
-// ==========================================
-new Equipment({
+// ============================================================
+// MATERIALS
+// ============================================================
+
+// -------------------- Gathering --------------------
+
+new Material({
+  id: "iron_ore",
+  name: "Iron Ore",
+  description: "Raw iron ore that can be smelted by a blacksmith.",
+  rarity: "common",
+  buyPrice: 15,
+  sellPrice: 8,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "gathering",
+});
+
+new Material({
+  id: "magic_dust",
+  name: "Magic Dust",
+  description: "Magical dust that glows faintly and is commonly used in alchemy.",
+  rarity: "uncommon",
+  buyPrice: 30,
+  sellPrice: 15,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "gathering",
+});
+
+// -------------------- Drops --------------------
+
+const goblinLeather = new Material({
+  id: "goblin_leather",
+  name: "Goblin Leather",
+  description: "Leather obtained from a goblin that can be used to craft basic equipment.",
+  rarity: "common",
+  buyPrice: 20,
+  sellPrice: 10,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "drops",
+});
+
+const goblinTooth = new Material({
+  id: "goblin_tooth",
+  name: "Goblin Tooth",
+  description: "A tooth obtained from a goblin that can be used as a crafting material.",
+  rarity: "common",
+  buyPrice: 10,
+  sellPrice: 5,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "drops",
+});
+
+const slimeGoo = new Material({
+  id: "slime_goo",
+  name: "Slime Goo",
+  description: "A sticky substance obtained from a slime and commonly used in alchemy.",
+  rarity: "common",
+  buyPrice: 8,
+  sellPrice: 4,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "drops",
+});
+
+const skeletonBone = new Material({
+  id: "skeleton_bone",
+  name: "Skeleton Bone",
+  description: "A sturdy bone obtained from a skeleton and used in various crafting recipes.",
+  rarity: "common",
+  buyPrice: 15,
+  sellPrice: 7,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "drops",
+});
+
+const orcLeather = new Material({
+  id: "orc_leather",
+  name: "Orc Leather",
+  description: "Durable leather obtained from an orc that can be used to craft armor.",
+  rarity: "uncommon",
+  buyPrice: 50,
+  sellPrice: 25,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "drops",
+});
+
+const orcTeeth = new Material({
+  id: "orc_teeth",
+  name: "Orc Teeth",
+  description: "Strong teeth obtained from an orc and used as uncommon crafting materials.",
+  rarity: "uncommon",
+  buyPrice: 40,
+  sellPrice: 20,
+  stackable: true,
+  maxStack: 99,
+  subCategory: "drops",
+});
+
+// ============================================================
+// EQUIPMENT
+// ============================================================
+
+// -------------------- Weapons --------------------
+
+const rustyIronSword = new Weapon({
+  id: "rusty_iron_sword",
+  name: "Rusty Iron Sword",
+  description: "An old iron sword covered in rust. Worn, but still usable.",
+  rarity: "common",
+  buyPrice: 100,
+  sellPrice: 50,
+  stackable: false,
+  maxStack: 1,
+  statsBonus: {
+    STR: 1,
+  },
+  requirements: {
+    level: 1,
+    stats: {
+      STR: 5,
+    },
+  },
+  maxDurability: 60,
+  maxUpgradeLevel: 2,
+  weaponStats: {
+    damage: 3,
+  },
+  effects: [],
+});
+
+const magicFireSword = new Weapon({
+  id: "magic_fire_sword",
+  name: "Magic Fire Sword",
+  description: "A magical sword infused with unstable fire energy.",
+  rarity: "rare",
+  buyPrice: 1200,
+  sellPrice: 600,
+  stackable: false,
+  maxStack: 1,
+  statsBonus: {
+    STR: 2,
+    WIS: 1,
+  },
+  requirements: {
+    level: 8,
+    stats: {
+      STR: 10,
+      WIS: 7,
+    },
+  },
+  maxDurability: 120,
+  maxUpgradeLevel: 5,
+  weaponStats: {
+    damage: 10,
+    critChance: 5,
+  },
+  effects: [
+    {
+      type: "burn",
+      chance: 20,
+      damage: 2,
+      duration: 3,
+    },
+  ],
+});
+
+new Weapon({
   id: "wooden_staff",
   name: "Wooden Staff",
-  description: "A simple staff used by novice mages. Lightweight but fragile.",
-  value: 120,
-  slot: "weapon",
-  statsBonus: { damage: 5, critChance: 2 } 
+  description: "A simple wooden staff commonly used by novice mages.",
+  rarity: "common",
+  buyPrice: 100,
+  sellPrice: 50,
+  stackable: false,
+  maxStack: 1,
+  statsBonus: {
+    WIS: 2,
+  },
+  requirements: {
+    level: 1,
+    stats: {
+      WIS: 5,
+    },
+  },
+  maxDurability: 50,
+  maxUpgradeLevel: 2,
+  weaponStats: {
+    damage: 2,
+    damageType: "magic",
+  },
+  effects: [],
 });
 
-new Equipment({
+new Weapon({
   id: "iron_dagger",
   name: "Iron Dagger",
-  description: "A fast and sharp blade, perfect for critical strikes.",
-  value: 200,
-  slot: "weapon",
-  statsBonus: { damage: 6, critChance: 15, critDamage: 5 }
+  description: "A light and sharp blade designed for quick attacks.",
+  rarity: "uncommon",
+  buyPrice: 250,
+  sellPrice: 125,
+  stackable: false,
+  maxStack: 1,
+  statsBonus: {
+    DEX: 2,
+  },
+  requirements: {
+    level: 3,
+    stats: {
+      DEX: 7,
+    },
+  },
+  maxDurability: 80,
+  maxUpgradeLevel: 3,
+  weaponStats: {
+    damage: 4,
+    critChance: 5,
+  },
+  effects: [
+    {
+      type: "bleeding",
+      chance: 15,
+      damage: 2,
+      duration: 3,
+    },
+  ],
 });
 
-// ==========================================
-// 🛡️ الدروع (Armor)
-// ==========================================
-new Equipment({
+// -------------------- Armor --------------------
+
+new Armor({
   id: "leather_tunic",
   name: "Leather Tunic",
-  description: "Provides basic protection without restricting your movement.",
-  value: 250,
+  description: "Light armor that provides basic protection without greatly restricting movement.",
+  rarity: "common",
+  buyPrice: 150,
+  sellPrice: 75,
+  stackable: false,
+  maxStack: 1,
+  statsBonus: {
+    VIT: 1,
+  },
+  requirements: {
+    level: 1,
+    stats: {
+      VIT: 5,
+    },
+  },
+  subCategory: "armor",
   slot: "armor",
-  statsBonus: { defense: 5 }
+  maxDurability: 80,
+  maxUpgradeLevel: 2,
+  armorStats: {
+    armor: 3,
+  },
+  effects: [],
 });
 
-new Equipment({
+new Armor({
   id: "iron_chestplate",
   name: "Iron Chestplate",
-  description: "Heavy armor that provides excellent defense against physical attacks.",
-  value: 600,
+  description: "Heavy iron armor that provides reliable protection against physical attacks.",
+  rarity: "uncommon",
+  buyPrice: 500,
+  sellPrice: 250,
+  stackable: false,
+  maxStack: 1,
+  statsBonus: {
+    VIT: 2,
+  },
+  requirements: {
+    level: 4,
+    stats: {
+      VIT: 8,
+    },
+  },
+  subCategory: "armor",
   slot: "armor",
-  statsBonus: { defense: 12 }
+  maxDurability: 150,
+  maxUpgradeLevel: 3,
+  armorStats: {
+    armor: 8,
+  },
+  effects: [],
 });
 
-// ==========================================
-// 💍 الإكسسوارات (Accessories)
-// ==========================================
+// -------------------- Accessories --------------------
+
 new Equipment({
   id: "ring_of_fortune",
   name: "Ring of Fortune",
-  description: "A shiny gold ring that slightly increases your drop rate.",
-  value: 800,
+  description: "A golden ring enchanted to slightly improve its wearer's luck.",
+  rarity: "uncommon",
+  buyPrice: 600,
+  sellPrice: 300,
+  stackable: false,
+  maxStack: 1,
+  subCategory: "accessory",
   slot: "accessory",
-  statsBonus: { defense: 1, dropRate: 10 } // 10% زيادة في الغنائم
+  statsBonus: {
+    LUK: 2,
+    dropRate: 5,
+  },
+  effects: [],
 });
 
 new Equipment({
   id: "amulet_of_vitality",
   name: "Amulet of Vitality",
-  description: "An ancient amulet that boosts your overall defense.",
-  value: 1000,
+  description: "An ancient amulet enchanted to strengthen its wearer's vitality.",
+  rarity: "rare",
+  buyPrice: 1000,
+  sellPrice: 500,
+  stackable: false,
+  maxStack: 1,
+  subCategory: "accessory",
   slot: "accessory",
-  statsBonus: { defense: 8 }
-});
-
-// ==========================================
-// 🪵 مواد التصنيع (Gathering / Materials)
-// ==========================================
-new Item({
-  id: "iron_ore",
-  name: "Iron Ore",
-  description: "Raw iron ore. Can be smelted by a blacksmith.",
-  category: "gathering",
-  value: 15,
-  stackable: true,
-  maxStack: 99
-});
-
-new Item({
-  id: "magic_dust",
-  name: "Magic Dust",
-  description: "Dust that glows in the dark. Used in alchemy.",
-  category: "gathering",
-  value: 30,
-  stackable: true,
-  maxStack: 99
+  statsBonus: {
+    VIT: 3,
+    defense: 3,
+  },
+  effects: [],
 });

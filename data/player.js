@@ -1,3 +1,5 @@
+// ./data/player.js
+
 const player = {
   id: "player_1",
 
@@ -6,26 +8,28 @@ const player = {
   },
 
   base_stats: {
-    STR: 5, // STR increases physical damage
-    VIT: 5, // VIT increases HP
-    WIS: 5, // WIS increases mana
-    DEX: 5, // DEX increases crit chance
-    LUK: 5, // LUK increases drop rate
+    STR: 5, // Strength: increases physical damage
+    VIT: 5, // Vitality: increases maximum Health
+    WIS: 5, // Wisdom: increases maximum Mana
+    DEX: 5, // Dexterity: increases Critical Chance
+    LUK: 5, // Luck: increases Drop Rate
   },
 
   resources: {
-    health: 10,
-    maxHealth: 10,
-    mana: 10,
-    maxMana: 10,
-    stamina: 10,
-    maxStamina: 10,
+    health: 50,
+    maxHealth: 50,
+
+    mana: 25,
+    maxMana: 25,
+
+    stamina: 30,
+    maxStamina: 30,
   },
 
   combat: {
-    damage: 4,
+    damage: 5,
     critChance: 5,
-    critDamage: 0, // 1.5 * damage
+    critDamage: 1.5,
   },
 
   progression: {
@@ -36,10 +40,11 @@ const player = {
   },
 
   economy: {
-    coins: 500,
+    coins: 50,
   },
 
   inventory: [],
+
   area_id: "abandoned_forest",
 
   equipment: {
@@ -47,8 +52,9 @@ const player = {
     armor: null,
     accessory: null,
   },
-  // currentBuffs
-  // statusEffects
+
+  // currentBuffs: [],
+  // statusEffects: [],
 };
 
 module.exports = { player };
