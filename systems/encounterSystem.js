@@ -1,4 +1,4 @@
-const { randomNumber } = require("../utitls/randoms");
+const { randomNumber } = require("../utils/randoms");
 
 // =========== ENCOUNTER SYSTEM ===========
 let encounterCheck = (chance) => {

@@ -1,6 +1,6 @@
 const { allInGameItems } = require("../factories/createItem");
 const { takeCoins, giveCoins, buyItem, sellItem } = require("./economySystem");
-const {  printDivider, printTitle, printspace } = require("../utitls/UIHelper");
+const {  printDivider, printTitle, printspace } = require("../utils/UIHelper");
 
 // =========== SHOP SYSTEM ===========
 let buy = (player, item) => {

@@ -2,8 +2,8 @@
 const { showInventoryBattle, getItem } = require("./inventorySystem");
 const { leveling } = require("./levelSystem");
 const { loot, dropItem } = require("./lootingSystem");
-const { dice, randomNumber } = require("../utitls/randoms");
-const combatUI = require("../utitls/combatUI");
+const { dice, randomNumber } = require("../utils/randoms");
+const combatUI = require("../utils/combatUI");
 const { getCombatStats } = require("./playerSystem");
 const createCombatRoutrt = require("../routers/combatRouter");
 

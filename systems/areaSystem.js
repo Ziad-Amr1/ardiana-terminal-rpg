@@ -1,6 +1,6 @@
 const gamestate = require("../state/gameState");
 const { allInGameAreas } = require("../factories/createAreas");
-const { printspace, printTitle } = require("../utitls/UIHelper");
+const { printspace, printTitle } = require("../utils/UIHelper");
 const { encounterCheck } = require("./encounterSystem");
 
 // =========== AREA SYSTEM ===========

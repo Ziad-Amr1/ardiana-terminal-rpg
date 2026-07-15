@@ -1,4 +1,4 @@
-const { printTitle, printspace } = require("../utitls/UIHelper");
+const { printTitle, printspace } = require("../utils/UIHelper");
 
 const {
   restoreMana,
