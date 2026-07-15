@@ -15,7 +15,7 @@ const { movePlayer } = require("./systems/areaSystem");
 const {
   renderCharacterIntro,
   characterStatsWindow,
-} = require("./utitls/renderCharacterIntro");
+} = require("./utils/renderCharacterIntro");
 const {
   renderMenu,
   renderMenuCity,
@@ -25,7 +25,7 @@ const {
   printSaveLoaded,
   printLeaveGame,
   renderBackPrompt,
-} = require("./utitls/UIHelper");
+} = require("./utils/UIHelper");
 const { rest } = require("./systems/restSystem");
 const { startDialogue } = require("./systems/dialogueSystem");
 const readline = require("readline");

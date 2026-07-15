@@ -1,0 +1,27 @@
+{
+  "inventory": {
+    "error": {
+      "InvalidItem": "Invalid Item.",
+      "InvalidInput": "Invalid Input.",
+      "InventoryFull": "Your inventory is full.",
+      "NotEnoughSpace": "You don't have enough space in your inventory to carry that many.",
+      "NotEnough": "You don't have that many.",
+      "NotFound": "You don't have that item.",
+      "CantCarryMore": "You can't carry more than 20 items.",
+      "InvalidQuantity": "Invalid quantity."
+    }
+  },
+
+  "equipment": {
+    "equipped": "You equipped {{itemName}} 🎒",
+    "unequipped": "You unequipped {{itemName}} 🎒",
+    "changed": "You unequipped {{oldItemName}} and equipped {{newItemName}} 🎒",
+    "error": {
+      "invalidSlot": "Invalid equipment slot.",
+      "failedToRemoveNewItem": "Failed to remove the new item from inventory.",
+      "failedToRestoreOldItem": "Failed to restore the old item to inventory.",
+      "notEnoughLevel": "You can't equip {{itemName}}.\nRequired Level: {{requiredLevel}}\nCurrent Level: {{currentLevel}}",
+      "notEnoughStats": "You can't equip {{itemName}}.\n\nRequirements:\n{{stats}}"
+    }
+  }
+}

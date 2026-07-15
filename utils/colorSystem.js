@@ -16,6 +16,14 @@ const stamina = (msg) => chalk.yellow(msg);
 const coins = (msg) => chalk.yellow(msg);
 const exp = (msg) => chalk.green(msg);
 const menuKeys = (msg) => chalk.cyan.bold(msg);
+const rarity = {
+  common: (msg) => chalk.white(msg),
+  uncommon: (msg) => chalk.green(msg),
+  rare: (msg) => chalk.cyan(msg),
+  epic: (msg) => chalk.magenta(msg),
+  legendary: (msg) => chalk.yellow(msg),
+  mythical: (msg) => chalk.red(msg),
+};
 
 module.exports = {
   error,
@@ -31,6 +39,7 @@ module.exports = {
   coins,
   exp,
   menuKeys,
+  rarity,
 };
 
 
